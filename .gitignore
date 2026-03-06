@@ -52,7 +52,7 @@ htmlcov/
 
 # Reports (generated)
 *.html
-*.json
+# *.json  <-- Removed this to allow package.json
 report_*
 
 # Logs
