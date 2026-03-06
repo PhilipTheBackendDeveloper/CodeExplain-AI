@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { 
   FileCode, Activity, AlertTriangle, Cpu, ChevronRight, 
   Terminal, BarChart3, LayoutDashboard, Settings, Info,
-  Code2, Sparkles, BookOpen, Layers, RefreshCw, XCircle
+  Code2, Sparkles, BookOpen, Layers, RefreshCw, XCircle, UploadCloud
 } from 'lucide-react';
-import {  AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 
 // --- Components ---
 
@@ -53,6 +53,7 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [mode, setMode] = useState('developer');
+  const fileInputRef = React.useRef(null);
 
   useEffect(() => {
     fetchFiles();
@@ -121,6 +122,35 @@ function App() {
     }
   };
 
+  const handleFileUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setLoading(true);
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok) throw new Error("File upload failed. Ensure the backend is running.");
+      
+      const data = await res.json();
+      await handleSelectFile(data);
+      fetchFiles(); // refresh explorer
+    } catch (err) {
+      console.error(err);
+      setError(err.message);
+    } finally {
+      setLoading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   // Re-run explanation when mode changes
   useEffect(() => {
     if (selectedFile && !loading && !error) {
@@ -164,8 +194,27 @@ function App() {
         </div>
 
         <div className="file-list">
-          <div style={{padding: '0 16px', marginBottom: '16px'}}>
+          <div style={{padding: '0 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
             <span style={{fontSize: '10px', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.1em'}}>Project Explorer</span>
+            
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              style={{
+                background: 'rgba(245,144,38,0.1)', color: 'var(--accent-color)', 
+                border: '1px solid rgba(245,144,38,0.2)', borderRadius: '4px',
+                padding: '4px 8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer',
+                display: 'flex', alignItems: 'center', gap: '4px'
+              }}
+            >
+              <UploadCloud size={12} /> UPLOAD
+            </button>
+            <input 
+              type="file" 
+              ref={fileInputRef} 
+              style={{ display: 'none' }} 
+              onChange={handleFileUpload} 
+              accept=".py,.js,.jsx,.ts,.tsx"
+            />
           </div>
           {files.length > 0 ? files.map(file => (
             <button

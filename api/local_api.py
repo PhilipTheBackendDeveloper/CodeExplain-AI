@@ -10,7 +10,7 @@ Endpoints:
 
 from datetime import datetime
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.response_models import (
@@ -75,6 +75,22 @@ def create_app() -> FastAPI:
         if not p.exists():
             raise HTTPException(status_code=404, detail="File not found")
         return {"content": p.read_text(encoding="utf-8")}
+
+    @app.post("/api/upload", tags=["Upload"])
+    async def upload_file(file: UploadFile = File(...)):
+        """Upload a file to be analyzed."""
+        import shutil
+        temp_dir = Path("temp_uploads")
+        temp_dir.mkdir(exist_ok=True)
+        
+        file_path = temp_dir / file.filename
+        with file_path.open("wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+            
+        return {
+            "name": file.filename,
+            "path": str(file_path).replace("\\", "/")
+        }
 
     @app.post("/analyze", response_model=AnalysisResponse, tags=["Analysis"])
     def analyze(req: AnalysisRequest) -> AnalysisResponse:
@@ -299,4 +315,6 @@ def create_app() -> FastAPI:
 # Allow direct running: python api/local_api.py
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(create_app(), host="127.0.0.1", port=8000, log_level="info")
+    import os
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run(create_app(), host="0.0.0.0", port=port, log_level="info")
