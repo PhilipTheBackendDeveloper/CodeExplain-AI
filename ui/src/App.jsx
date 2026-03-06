@@ -504,8 +504,8 @@ function App() {
 
       {/* Deep Trace Modal */}
       <Modal isOpen={showTrace} onClose={() => setShowTrace(false)} title="Deep Trace Analysis">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px', width: '100%' }}>
+          <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '14px', border: '1px solid var(--border-color)', width: '100%' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
               <Search size={18} color="var(--accent-color)" />
               <span className="metric-label" style={{ fontSize: '13px' }}>Raw AST Mapping</span>
@@ -515,19 +515,19 @@ function App() {
             </pre>
           </div>
           
-          <div className="dashboard-grid">
-             <div className="col-6 white-panel" style={{ padding: '32px' }}>
+          <div className="dashboard-grid" style={{ width: '100%' }}>
+             <div className="col-6 white-panel" style={{ padding: '32px', minWidth: '0' }}>
                 <h4 style={{ fontSize: '15px', marginBottom: '16px' }}>Semantic Nodes</h4>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                    {(analysis?.complexity?.functions || []).length > 0 ? analysis.complexity.functions.map((f, i) => (
-                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{f.name}</span>
-                        <span style={{ fontWeight: 800 }}>{f.complexity} CPX</span>
+                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', gap: '10px' }}>
+                        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)', overflowWrap: 'anywhere' }}>{f.name}</span>
+                        <span style={{ fontWeight: 800, flexShrink: 0 }}>{f.complexity} CPX</span>
                      </div>
                    )) : <p style={{ color: 'var(--text-tertiary)', fontSize: '13px' }}>No specific nodes found.</p>}
                 </div>
              </div>
-             <div className="col-6 white-panel" style={{ padding: '32px' }}>
+             <div className="col-6 white-panel" style={{ padding: '32px', minWidth: '0' }}>
                 <h4 style={{ fontSize: '15px', marginBottom: '16px' }}>Logical Flow</h4>
                 <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Structural integrity verified via <strong>{analysis?.metrics?.total_lines || 0} lines</strong> of recursive analysis.
