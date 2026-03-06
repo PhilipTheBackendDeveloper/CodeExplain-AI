@@ -1,0 +1,35 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\projects\Explain_CodeAI
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.0.0
+collecting ... collected 25 items
+
+tests/test_parser.py::TestASTParser::test_parse_valid_source PASSED      [  4%]
+tests/test_parser.py::TestASTParser::test_parse_invalid_source PASSED    [  8%]
+tests/test_parser.py::TestASTParser::test_parse_file_not_found PASSED    [ 12%]
+tests/test_parser.py::TestASTParser::test_iter_functions PASSED          [ 16%]
+tests/test_parser.py::TestASTParser::test_iter_classes PASSED            [ 20%]
+tests/test_parser.py::TestASTParser::test_iter_imports PASSED            [ 24%]
+tests/test_parser.py::TestASTParser::test_dump PASSED                    [ 28%]
+tests/test_parser.py::TestNodeMapper::test_maps_module PASSED            [ 32%]
+tests/test_parser.py::TestNodeMapper::test_maps_functions PASSED         [ 36%]
+tests/test_parser.py::TestNodeMapper::test_maps_classes PASSED           [ 40%]
+tests/test_parser.py::TestNodeMapper::test_maps_class_methods PASSED     [ 44%]
+tests/test_parser.py::TestNodeMapper::test_maps_function_args PASSED     [ 48%]
+tests/test_parser.py::TestNodeMapper::test_maps_return_annotation PASSED [ 52%]
+tests/test_parser.py::TestNodeMapper::test_maps_async PASSED             [ 56%]
+tests/test_parser.py::TestNodeMapper::test_maps_has_return PASSED        [ 60%]
+tests/test_parser.py::TestNodeMapper::test_maps_imports PASSED           [ 64%]
+tests/test_parser.py::TestNodeMapper::test_maps_global_variables PASSED  [ 68%]
+tests/test_parser.py::TestNodeMapper::test_all_functions_includes_methods PASSED [ 72%]
+tests/test_parser.py::TestNodeMapper::test_recursive_detection PASSED    [ 76%]
+tests/test_parser.py::TestSymbolTable::test_finds_function_symbols PASSED [ 80%]
+tests/test_parser.py::TestSymbolTable::test_finds_class_symbols PASSED   [ 84%]
+tests/test_parser.py::TestSymbolTable::test_finds_import_symbols PASSED  [ 88%]
+tests/test_parser.py::TestSymbolTable::test_finds_variable_symbols PASSED [ 92%]
+tests/test_parser.py::TestSymbolTable::test_get_all_symbols_excludes_builtins PASSED [ 96%]
+tests/test_parser.py::TestSymbolTable::test_unused_imports_detection PASSED [100%]
+
+============================= 25 passed in 0.16s ==============================

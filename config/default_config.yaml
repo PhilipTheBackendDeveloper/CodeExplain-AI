@@ -1,0 +1,63 @@
+# CodeExplain AI — Default Configuration
+# This file controls global behavior. Override via .env or CLI flags.
+
+analysis:
+  # Maximum complexity score before flagging as "high complexity"
+  complexity_threshold: 10
+  # Maximum nesting depth before flagging
+  nesting_threshold: 4
+  # Maximum function length (lines) before flagging as too long
+  max_function_lines: 50
+  # Maximum number of function arguments before flagging
+  max_arguments: 5
+  # Maximum number of imports before flagging
+  max_imports: 20
+
+explanation:
+  # Default mode: developer | beginner | fun:pirate | fun:shakespeare | fun:eli5
+  default_mode: developer
+  # Include docstring in explanation if present
+  include_docstrings: true
+  # Include complexity notes in developer mode
+  include_complexity_notes: true
+
+output:
+  # Default format: cli | json | html | markdown
+  default_format: cli
+  # Colorize terminal output
+  colorize: true
+  # Show ASCII diagrams in CLI output
+  show_diagrams: true
+
+api:
+  host: "127.0.0.1"
+  port: 8000
+  reload: false
+
+logging:
+  # DEBUG | INFO | WARNING | ERROR
+  level: INFO
+  # Log to file (leave empty to disable)
+  file: ""
+
+plugins:
+  # Directory to scan for plugins (relative to project root)
+  directory: plugins
+  # Auto-load all discovered plugins
+  auto_load: true
+
+scoring:
+  # Weights for difficulty score (must sum to 1.0)
+  difficulty_weights:
+    cyclomatic_complexity: 0.35
+    nesting_depth: 0.25
+    recursion: 0.20
+    argument_count: 0.10
+    dependency_count: 0.10
+
+  # Weights for maintainability score
+  maintainability_weights:
+    loc: 0.25
+    cyclomatic_complexity: 0.35
+    comment_ratio: 0.15
+    halstead_volume: 0.25

@@ -1,0 +1,72 @@
+# CodeExplain AI — Code Analysis Rules
+# These rules define what constitutes a code smell or violation.
+
+code_smells:
+  long_function:
+    enabled: true
+    threshold_lines: 50
+    severity: warning
+    message: "Function '{name}' is too long ({lines} lines). Consider refactoring."
+
+  deep_nesting:
+    enabled: true
+    threshold_depth: 4
+    severity: warning
+    message: "Deep nesting detected ({depth} levels) in '{name}'. Simplify control flow."
+
+  too_many_arguments:
+    enabled: true
+    threshold_args: 5
+    severity: warning
+    message: "Function '{name}' has too many arguments ({count}). Consider using a dataclass."
+
+  unused_imports:
+    enabled: true
+    severity: info
+    message: "Import '{name}' appears unused."
+
+  bare_except:
+    enabled: true
+    severity: error
+    message: "Bare 'except:' clause detected. Specify exception types explicitly."
+
+  magic_numbers:
+    enabled: true
+    severity: info
+    message: "Magic number {value} detected. Consider using a named constant."
+
+  duplicate_code:
+    enabled: false  # Requires cross-function analysis (future feature)
+    severity: warning
+
+  god_function:
+    enabled: true
+    threshold_lines: 100
+    severity: error
+    message: "'{name}' is a god function ({lines} lines). It does too much."
+
+  missing_docstring:
+    enabled: true
+    severity: info
+    message: "'{name}' is missing a docstring."
+
+complexity:
+  cyclomatic:
+    low: 5         # 1–5: Low complexity
+    medium: 10     # 6–10: Medium complexity
+    high: 20       # 11–20: High complexity
+    very_high: 999 # 21+: Very high complexity
+
+  halstead:
+    # Halstead difficulty thresholds
+    easy: 10
+    moderate: 20
+    hard: 35
+    extreme: 999
+
+maintainability:
+  # Maintainability Index thresholds (0-100 scale)
+  excellent: 85
+  good: 65
+  fair: 40
+  poor: 0

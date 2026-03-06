@@ -1,0 +1,94 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\projects\Explain_CodeAI
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.0.0
+collecting ... collected 16 items
+
+tests/test_explainer.py::TestExplanationEngine::test_developer_mode_returns_string FAILED [  6%]
+tests/test_explainer.py::TestExplanationEngine::test_beginner_mode_returns_string PASSED [ 12%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_pirate_mode PASSED [ 18%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_shakespeare_mode PASSED [ 25%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_eli5_mode PASSED [ 31%]
+tests/test_explainer.py::TestExplanationEngine::test_invalid_mode_raises PASSED [ 37%]
+tests/test_explainer.py::TestExplanationEngine::test_list_modes PASSED   [ 43%]
+tests/test_explainer.py::TestExplanationEngine::test_all_valid_modes FAILED [ 50%]
+tests/test_explainer.py::TestBeginnerMode::test_produces_non_empty_output PASSED [ 56%]
+tests/test_explainer.py::TestBeginnerMode::test_mentions_function_names PASSED [ 62%]
+tests/test_explainer.py::TestBeginnerMode::test_mentions_class_names PASSED [ 68%]
+tests/test_explainer.py::TestDeveloperMode::test_produces_non_empty_output FAILED [ 75%]
+tests/test_explainer.py::TestDeveloperMode::test_includes_type_annotations FAILED [ 81%]
+tests/test_explainer.py::TestDeveloperMode::test_mentions_async FAILED   [ 87%]
+tests/test_explainer.py::TestFunModes::test_available_modes PASSED       [ 93%]
+tests/test_explainer.py::TestFunModes::test_unknown_fun_mode_raises PASSED [100%]
+
+================================== FAILURES ===================================
+__________ TestExplanationEngine.test_developer_mode_returns_string ___________
+tests\test_explainer.py:56: in test_developer_mode_returns_string
+    text = engine.explain(module, mode="developer")
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\explanation_engine.py:36: in explain
+    return self._developer.explain(module)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:102: in explain
+    sections = [explain_module_developer(module)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:90: in explain_module_developer
+    third = [i.module for i in module.imports if i.category == "third_party"]
+                                                 ^^^^^^^^^^
+E   AttributeError: 'ImportNode' object has no attribute 'category'
+_________________ TestExplanationEngine.test_all_valid_modes __________________
+tests\test_explainer.py:100: in test_all_valid_modes
+    text = engine.explain(module, mode=mode)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\explanation_engine.py:36: in explain
+    return self._developer.explain(module)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:102: in explain
+    sections = [explain_module_developer(module)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:90: in explain_module_developer
+    third = [i.module for i in module.imports if i.category == "third_party"]
+                                                 ^^^^^^^^^^
+E   AttributeError: 'ImportNode' object has no attribute 'category'
+______________ TestDeveloperMode.test_produces_non_empty_output _______________
+tests\test_explainer.py:124: in test_produces_non_empty_output
+    text = explainer.explain(module)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:102: in explain
+    sections = [explain_module_developer(module)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:90: in explain_module_developer
+    third = [i.module for i in module.imports if i.category == "third_party"]
+                                                 ^^^^^^^^^^
+E   AttributeError: 'ImportNode' object has no attribute 'category'
+______________ TestDeveloperMode.test_includes_type_annotations _______________
+tests\test_explainer.py:129: in test_includes_type_annotations
+    text = explainer.explain(module)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:102: in explain
+    sections = [explain_module_developer(module)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:90: in explain_module_developer
+    third = [i.module for i in module.imports if i.category == "third_party"]
+                                                 ^^^^^^^^^^
+E   AttributeError: 'ImportNode' object has no attribute 'category'
+____________________ TestDeveloperMode.test_mentions_async ____________________
+tests\test_explainer.py:135: in test_mentions_async
+    text = explainer.explain(module)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:102: in explain
+    sections = [explain_module_developer(module)]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+core\explainer\developer_mode.py:90: in explain_module_developer
+    third = [i.module for i in module.imports if i.category == "third_party"]
+                                                 ^^^^^^^^^^
+E   AttributeError: 'ImportNode' object has no attribute 'category'
+=========================== short test summary info ===========================
+FAILED tests/test_explainer.py::TestExplanationEngine::test_developer_mode_returns_string
+FAILED tests/test_explainer.py::TestExplanationEngine::test_all_valid_modes
+FAILED tests/test_explainer.py::TestDeveloperMode::test_produces_non_empty_output
+FAILED tests/test_explainer.py::TestDeveloperMode::test_includes_type_annotations
+FAILED tests/test_explainer.py::TestDeveloperMode::test_mentions_async - Attr...
+======================== 5 failed, 11 passed in 0.30s =========================

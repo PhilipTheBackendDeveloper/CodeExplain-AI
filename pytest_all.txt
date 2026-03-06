@@ -1,0 +1,184 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\projects\Explain_CodeAI
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.0.0
+collecting ... collected 82 items
+
+tests/test_parser.py::TestASTParser::test_parse_valid_source PASSED      [  1%]
+tests/test_parser.py::TestASTParser::test_parse_invalid_source PASSED    [  2%]
+tests/test_parser.py::TestASTParser::test_parse_file_not_found PASSED    [  3%]
+tests/test_parser.py::TestASTParser::test_iter_functions PASSED          [  4%]
+tests/test_parser.py::TestASTParser::test_iter_classes PASSED            [  6%]
+tests/test_parser.py::TestASTParser::test_iter_imports PASSED            [  7%]
+tests/test_parser.py::TestASTParser::test_dump PASSED                    [  8%]
+tests/test_parser.py::TestNodeMapper::test_maps_module PASSED            [  9%]
+tests/test_parser.py::TestNodeMapper::test_maps_functions PASSED         [ 10%]
+tests/test_parser.py::TestNodeMapper::test_maps_classes PASSED           [ 12%]
+tests/test_parser.py::TestNodeMapper::test_maps_class_methods PASSED     [ 13%]
+tests/test_parser.py::TestNodeMapper::test_maps_function_args PASSED     [ 14%]
+tests/test_parser.py::TestNodeMapper::test_maps_return_annotation PASSED [ 15%]
+tests/test_parser.py::TestNodeMapper::test_maps_async PASSED             [ 17%]
+tests/test_parser.py::TestNodeMapper::test_maps_has_return PASSED        [ 18%]
+tests/test_parser.py::TestNodeMapper::test_maps_imports PASSED           [ 19%]
+tests/test_parser.py::TestNodeMapper::test_maps_global_variables PASSED  [ 20%]
+tests/test_parser.py::TestNodeMapper::test_all_functions_includes_methods PASSED [ 21%]
+tests/test_parser.py::TestNodeMapper::test_recursive_detection PASSED    [ 23%]
+tests/test_parser.py::TestSymbolTable::test_finds_function_symbols PASSED [ 24%]
+tests/test_parser.py::TestSymbolTable::test_finds_class_symbols PASSED   [ 25%]
+tests/test_parser.py::TestSymbolTable::test_finds_import_symbols PASSED  [ 26%]
+tests/test_parser.py::TestSymbolTable::test_finds_variable_symbols PASSED [ 28%]
+tests/test_parser.py::TestSymbolTable::test_get_all_symbols_excludes_builtins PASSED [ 29%]
+tests/test_parser.py::TestSymbolTable::test_unused_imports_detection PASSED [ 30%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_simple_function_low_cc PASSED [ 31%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_complex_function_higher_cc PASSED [ 32%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_recursive_detection PASSED [ 34%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_non_recursive_no_flag PASSED [ 35%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_loop_count PASSED   [ 36%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_overall_label_exists PASSED [ 37%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_average_complexity_positive PASSED [ 39%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_most_complex_function PASSED [ 40%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_finds_imports PASSED [ 41%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_categorizes_stdlib PASSED [ 42%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_categorizes_third_party PASSED [ 43%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_total_count PASSED  [ 45%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_from_import_flag PASSED [ 46%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_bare_except PASSED [ 47%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_too_many_args PASSED [ 48%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_missing_docstring PASSED [ 50%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_clean_code_no_errors PASSED [ 51%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_severity_levels PASSED [ 52%]
+tests/test_analyzer.py::TestMetricsComputer::test_line_counts PASSED     [ 53%]
+tests/test_analyzer.py::TestMetricsComputer::test_function_count PASSED  [ 54%]
+tests/test_analyzer.py::TestMetricsComputer::test_halstead_volume_positive PASSED [ 56%]
+tests/test_analyzer.py::TestMetricsComputer::test_comment_ratio_between_zero_and_one PASSED [ 57%]
+tests/test_analyzer.py::TestMetricsComputer::test_summary_dict_shape PASSED [ 58%]
+tests/test_explainer.py::TestExplanationEngine::test_developer_mode_returns_string PASSED [ 59%]
+tests/test_explainer.py::TestExplanationEngine::test_beginner_mode_returns_string PASSED [ 60%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_pirate_mode PASSED [ 62%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_shakespeare_mode PASSED [ 63%]
+tests/test_explainer.py::TestExplanationEngine::test_fun_eli5_mode PASSED [ 64%]
+tests/test_explainer.py::TestExplanationEngine::test_invalid_mode_raises PASSED [ 65%]
+tests/test_explainer.py::TestExplanationEngine::test_list_modes PASSED   [ 67%]
+tests/test_explainer.py::TestExplanationEngine::test_all_valid_modes PASSED [ 68%]
+tests/test_explainer.py::TestBeginnerMode::test_produces_non_empty_output PASSED [ 69%]
+tests/test_explainer.py::TestBeginnerMode::test_mentions_function_names PASSED [ 70%]
+tests/test_explainer.py::TestBeginnerMode::test_mentions_class_names PASSED [ 71%]
+tests/test_explainer.py::TestDeveloperMode::test_produces_non_empty_output PASSED [ 73%]
+tests/test_explainer.py::TestDeveloperMode::test_includes_type_annotations PASSED [ 74%]
+tests/test_explainer.py::TestDeveloperMode::test_mentions_async PASSED   [ 75%]
+tests/test_explainer.py::TestFunModes::test_available_modes PASSED       [ 76%]
+tests/test_explainer.py::TestFunModes::test_unknown_fun_mode_raises PASSED [ 78%]
+tests/test_cli.py::TestMainCLI::test_no_args_shows_banner PASSED         [ 79%]
+tests/test_cli.py::TestMainCLI::test_help PASSED                         [ 80%]
+tests/test_cli.py::TestExplainCommand::test_explain_developer_mode FAILED [ 81%]
+tests/test_cli.py::TestExplainCommand::test_explain_beginner_mode FAILED [ 82%]
+tests/test_cli.py::TestExplainCommand::test_explain_pirate_mode FAILED   [ 84%]
+tests/test_cli.py::TestExplainCommand::test_explain_json_output FAILED   [ 85%]
+tests/test_cli.py::TestExplainCommand::test_explain_save_to_file FAILED  [ 86%]
+tests/test_cli.py::TestAnalyzeCommand::test_analyze_default PASSED       [ 87%]
+tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_smells FAILED     [ 89%]
+tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_complexity FAILED [ 90%]
+tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_metrics FAILED    [ 91%]
+tests/test_cli.py::TestVisualizeCommand::test_visualize_default_tree FAILED [ 92%]
+tests/test_cli.py::TestVisualizeCommand::test_visualize_call_graph FAILED [ 93%]
+tests/test_cli.py::TestVisualizeCommand::test_visualize_control_flow FAILED [ 95%]
+tests/test_cli.py::TestVisualizeCommand::test_visualize_dependency_graph FAILED [ 96%]
+tests/test_cli.py::TestReportCommand::test_report_json FAILED            [ 97%]
+tests/test_cli.py::TestReportCommand::test_report_html FAILED            [ 98%]
+tests/test_cli.py::TestReportCommand::test_report_markdown FAILED        [100%]
+
+================================== FAILURES ===================================
+_______________ TestExplainCommand.test_explain_developer_mode ________________
+tests\test_cli.py:67: in test_explain_developer_mode
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+________________ TestExplainCommand.test_explain_beginner_mode ________________
+tests\test_cli.py:71: in test_explain_beginner_mode
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+_________________ TestExplainCommand.test_explain_pirate_mode _________________
+tests\test_cli.py:75: in test_explain_pirate_mode
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+_________________ TestExplainCommand.test_explain_json_output _________________
+tests\test_cli.py:79: in test_explain_json_output
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+________________ TestExplainCommand.test_explain_save_to_file _________________
+tests\test_cli.py:88: in test_explain_save_to_file
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+__________________ TestAnalyzeCommand.test_analyze_no_smells __________________
+tests\test_cli.py:99: in test_analyze_no_smells
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+________________ TestAnalyzeCommand.test_analyze_no_complexity ________________
+tests\test_cli.py:103: in test_analyze_no_complexity
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+_________________ TestAnalyzeCommand.test_analyze_no_metrics __________________
+tests\test_cli.py:107: in test_analyze_no_metrics
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+______________ TestVisualizeCommand.test_visualize_default_tree _______________
+tests\test_cli.py:113: in test_visualize_default_tree
+    assert result.exit_code == 0
+E   assert 1 == 0
+E    +  where 1 = <Result AttributeError("'ImportNode' object has no attribute 'category'")>.exit_code
+_______________ TestVisualizeCommand.test_visualize_call_graph ________________
+tests\test_cli.py:117: in test_visualize_call_graph
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+______________ TestVisualizeCommand.test_visualize_control_flow _______________
+tests\test_cli.py:121: in test_visualize_control_flow
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+____________ TestVisualizeCommand.test_visualize_dependency_graph _____________
+tests\test_cli.py:125: in test_visualize_dependency_graph
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+_____________________ TestReportCommand.test_report_json ______________________
+tests\test_cli.py:134: in test_report_json
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+_____________________ TestReportCommand.test_report_html ______________________
+tests\test_cli.py:144: in test_report_html
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+___________________ TestReportCommand.test_report_markdown ____________________
+tests\test_cli.py:154: in test_report_markdown
+    assert result.exit_code == 0
+E   assert 2 == 0
+E    +  where 2 = <Result SystemExit(2)>.exit_code
+=========================== short test summary info ===========================
+FAILED tests/test_cli.py::TestExplainCommand::test_explain_developer_mode - a...
+FAILED tests/test_cli.py::TestExplainCommand::test_explain_beginner_mode - as...
+FAILED tests/test_cli.py::TestExplainCommand::test_explain_pirate_mode - asse...
+FAILED tests/test_cli.py::TestExplainCommand::test_explain_json_output - asse...
+FAILED tests/test_cli.py::TestExplainCommand::test_explain_save_to_file - ass...
+FAILED tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_smells - assert...
+FAILED tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_complexity - as...
+FAILED tests/test_cli.py::TestAnalyzeCommand::test_analyze_no_metrics - asser...
+FAILED tests/test_cli.py::TestVisualizeCommand::test_visualize_default_tree
+FAILED tests/test_cli.py::TestVisualizeCommand::test_visualize_call_graph - a...
+FAILED tests/test_cli.py::TestVisualizeCommand::test_visualize_control_flow
+FAILED tests/test_cli.py::TestVisualizeCommand::test_visualize_dependency_graph
+FAILED tests/test_cli.py::TestReportCommand::test_report_json - assert 2 == 0
+FAILED tests/test_cli.py::TestReportCommand::test_report_html - assert 2 == 0
+FAILED tests/test_cli.py::TestReportCommand::test_report_markdown - assert 2 ...
+======================== 15 failed, 67 passed in 1.91s ========================

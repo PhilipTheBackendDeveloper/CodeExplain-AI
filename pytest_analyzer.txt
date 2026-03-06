@@ -1,0 +1,33 @@
+﻿============================= test session starts =============================
+platform win32 -- Python 3.14.3, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\projects\Explain_CodeAI
+configfile: pyproject.toml
+plugins: anyio-4.12.1, cov-7.0.0
+collecting ... collected 23 items
+
+tests/test_analyzer.py::TestComplexityAnalyzer::test_simple_function_low_cc PASSED [  4%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_complex_function_higher_cc PASSED [  8%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_recursive_detection PASSED [ 13%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_non_recursive_no_flag PASSED [ 17%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_loop_count PASSED   [ 21%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_overall_label_exists PASSED [ 26%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_average_complexity_positive PASSED [ 30%]
+tests/test_analyzer.py::TestComplexityAnalyzer::test_most_complex_function PASSED [ 34%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_finds_imports PASSED [ 39%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_categorizes_stdlib PASSED [ 43%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_categorizes_third_party PASSED [ 47%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_total_count PASSED  [ 52%]
+tests/test_analyzer.py::TestDependencyAnalyzer::test_from_import_flag PASSED [ 56%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_bare_except PASSED [ 60%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_too_many_args PASSED [ 65%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_detects_missing_docstring PASSED [ 69%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_clean_code_no_errors PASSED [ 73%]
+tests/test_analyzer.py::TestCodeSmellDetector::test_severity_levels PASSED [ 78%]
+tests/test_analyzer.py::TestMetricsComputer::test_line_counts PASSED     [ 82%]
+tests/test_analyzer.py::TestMetricsComputer::test_function_count PASSED  [ 86%]
+tests/test_analyzer.py::TestMetricsComputer::test_halstead_volume_positive PASSED [ 91%]
+tests/test_analyzer.py::TestMetricsComputer::test_comment_ratio_between_zero_and_one PASSED [ 95%]
+tests/test_analyzer.py::TestMetricsComputer::test_summary_dict_shape PASSED [100%]
+
+============================= 23 passed in 0.28s ==============================
