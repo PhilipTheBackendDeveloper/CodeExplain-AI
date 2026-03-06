@@ -21,6 +21,9 @@ from api.response_models import (
     ComplexityModel, FunctionComplexityModel,
     MetricsModel, SmellModel, ScoresModel,
 )
+from fastapi.staticfiles import StaticFiles
+from pathlib import Path
+import os
 
 
 def create_app() -> FastAPI:
@@ -46,26 +49,63 @@ def create_app() -> FastAPI:
         """Health check endpoint."""
         return HealthResponse(
             status="ok",
-            version="1.0.0",
-            message="CodeExplain AI is running.",
+            version="1.1.0",
+            message="CodeExplain AI (Multi-Lang) is running.",
         )
+
+    @app.get("/api/files", tags=["Explorer"])
+    def list_files(path: str = "."):
+        """List files in the project for the dashboard explorer."""
+        base_path = Path(path).resolve()
+        exclude = {".git", "__pycache__", "node_modules", ".venv", ".pytest_cache", "ui"}
+        
+        files = []
+        for root, dirs, filenames in os.walk(base_path):
+            dirs[:] = [d for d in dirs if d not in exclude]
+            for f in filenames:
+                if f.endswith((".py", ".ts", ".tsx", ".js", ".jsx")):
+                    rel = os.path.relpath(os.path.join(root, f), base_path)
+                    files.append({"name": f, "path": rel.replace("\\", "/")})
+        return sorted(files, key=lambda x: x['path'])
+
+    @app.get("/api/file-content", tags=["Explorer"])
+    def get_file_content(path: str):
+        """Fetch content of a specific file."""
+        p = Path(path)
+        if not p.exists():
+            raise HTTPException(status_code=404, detail="File not found")
+        return {"content": p.read_text(encoding="utf-8")}
 
     @app.post("/analyze", response_model=AnalysisResponse, tags=["Analysis"])
     def analyze(req: AnalysisRequest) -> AnalysisResponse:
-        """Analyze Python source code for complexity, smells, and metrics."""
-        from core.parser.ast_parser import ASTParser
-        from core.parser.node_mapper import NodeMapper
+        """Analyze source code for complexity, smells, and metrics."""
+        from core.parser.factory import UniversalParser
         from core.analyzer.complexity_analyzer import ComplexityAnalyzer
         from core.analyzer.code_smells import CodeSmellDetector
         from core.analyzer.metrics import MetricsComputer
         from core.scoring.difficulty_score import DifficultyScorer
         from core.scoring.maintainability_score import MaintainabilityScorer
 
-        parser = ASTParser()
-        parse_result = parser.parse_source(req.source, filename=req.filename)
-
-        if not parse_result.success:
-            raise HTTPException(status_code=400, detail=parse_result.errors[0])
+        u_parser = UniversalParser()
+        try:
+            module = u_parser.parse_and_map(Path(req.source_path)) if getattr(req, 'source_path', None) else None
+            # Fallback for direct source if path not provided
+            if not module:
+                from core.parser.ast_parser import ASTParser
+                from core.parser.node_mapper import NodeMapper
+                p = ASTParser()
+                pr = p.parse_source(req.source, filename=req.filename)
+                if not pr.success:
+                    raise HTTPException(status_code=400, detail=pr.errors[0])
+                module = NodeMapper().map(pr)
+                parse_result = pr
+            else:
+                # If we have a path, we might want to re-parse as AST for python-only features
+                from core.parser.ast_parser import ASTParser
+                p = ASTParser()
+                parse_result = p.parse_source(req.source, filename=req.filename)
+        except Exception as e:
+             raise HTTPException(status_code=400, detail=str(e))
 
         now = datetime.now().isoformat()
         response = AnalysisResponse(filename=req.filename, generated_at=now)
@@ -139,24 +179,26 @@ def create_app() -> FastAPI:
 
     @app.post("/explain", response_model=ExplanationResponse, tags=["Explanation"])
     def explain(req: ExplainRequest) -> ExplanationResponse:
-        """Generate a human-readable explanation of Python source code."""
-        from core.parser.ast_parser import ASTParser
-        from core.parser.node_mapper import NodeMapper
+        """Generate a human-readable explanation of source code."""
+        from core.parser.factory import UniversalParser
         from core.explainer.explanation_engine import ExplanationEngine
 
-        parser = ASTParser()
-        parse_result = parser.parse_source(req.source, filename=req.filename)
-
-        if not parse_result.success:
-            raise HTTPException(status_code=400, detail=parse_result.errors[0])
-
-        mapper = NodeMapper()
-        module = mapper.map(parse_result)
-
+        u_parser = UniversalParser()
         try:
+            if req.source_path and Path(req.source_path).exists():
+                module = u_parser.parse_and_map(Path(req.source_path))
+            else:
+                from core.parser.ast_parser import ASTParser
+                from core.parser.node_mapper import NodeMapper
+                p = ASTParser()
+                pr = p.parse_source(req.source, filename=req.filename)
+                if not pr.success:
+                    raise HTTPException(status_code=400, detail=pr.errors[0])
+                module = NodeMapper().map(pr)
+            
             engine = ExplanationEngine()
             explanation = engine.explain(module, mode=req.mode)
-        except ValueError as e:
+        except Exception as e:
             raise HTTPException(status_code=400, detail=str(e))
 
         return ExplanationResponse(
@@ -169,65 +211,74 @@ def create_app() -> FastAPI:
     @app.post("/report", response_model=ReportResponse, tags=["Reports"])
     def generate_report(req: ReportRequest) -> ReportResponse:
         """Generate a full analysis report in JSON, HTML, or Markdown."""
-        from core.parser.ast_parser import ASTParser
-        from core.parser.node_mapper import NodeMapper
-        from core.analyzer.complexity_analyzer import ComplexityAnalyzer
-        from core.analyzer.code_smells import CodeSmellDetector
-        from core.analyzer.metrics import MetricsComputer
+        from core.parser.factory import UniversalParser
         from core.explainer.explanation_engine import ExplanationEngine
-        from core.scoring.difficulty_score import DifficultyScorer
-        from core.scoring.maintainability_score import MaintainabilityScorer
         from utils.formatter import to_html, to_json, to_markdown
 
-        parser = ASTParser()
-        parse_result = parser.parse_source(req.source, filename=req.filename)
+        u_parser = UniversalParser()
+        try:
+            p = Path(req.source_path) if req.source_path else None
+            is_python = (p.suffix.lower() == ".py") if (p and p.suffix) else True
+            
+            module = u_parser.parse_and_map(p) if p else None
+            if not module:
+                from core.parser.ast_parser import ASTParser
+                from core.parser.node_mapper import NodeMapper
+                parser = ASTParser()
+                parse_result = parser.parse_source(req.source, filename=req.filename)
+                if not parse_result.success:
+                    raise HTTPException(status_code=400, detail=parse_result.errors[0])
+                module = NodeMapper().map(parse_result)
+            elif is_python:
+                from core.parser.ast_parser import ASTParser
+                parser = ASTParser()
+                parse_result = parser.parse_source(req.source, filename=req.filename)
+            else:
+                parse_result = None
 
-        if not parse_result.success:
-            raise HTTPException(status_code=400, detail=parse_result.errors[0])
+            if is_python and parse_result:
+                from core.analyzer.complexity_analyzer import ComplexityAnalyzer
+                from core.analyzer.code_smells import CodeSmellDetector
+                from core.analyzer.metrics import MetricsComputer
+                from core.scoring.difficulty_score import DifficultyScorer
+                from core.scoring.maintainability_score import MaintainabilityScorer
 
-        mapper = NodeMapper()
-        module = mapper.map(parse_result)
+                mc = MetricsComputer()
+                m = mc.compute(parse_result)
+                ca = ComplexityAnalyzer()
+                complexity = ca.analyze(parse_result)
+                detector = CodeSmellDetector()
+                smells = detector.detect(parse_result)
+                engine = ExplanationEngine()
+                explanation = engine.explain(module, mode=req.mode)
+                diff = DifficultyScorer().score(complexity, smells_count=smells.total_count)
+                maint = MaintainabilityScorer().score(m, complexity)
 
-        mc = MetricsComputer()
-        m = mc.compute(parse_result)
-        ca = ComplexityAnalyzer()
-        complexity = ca.analyze(parse_result)
-        detector = CodeSmellDetector()
-        smells = detector.detect(parse_result)
-        engine = ExplanationEngine()
-        explanation = engine.explain(module, mode=req.mode)
-        diff = DifficultyScorer().score(complexity, smells_count=smells.total_count)
-        maint = MaintainabilityScorer().score(m, complexity)
-
-        data = {
-            "file": req.filename,
-            "metrics": m.summary(),
-            "complexity": {
-                "overall_label": complexity.overall_label,
-                "average_complexity": complexity.average_complexity,
-                "max_complexity": complexity.max_complexity,
-                "functions": [
-                    {"name": f.name, "cyclomatic_complexity": f.cyclomatic_complexity,
-                     "nesting_depth": f.nesting_depth, "loop_count": f.loop_count,
-                     "has_recursion": f.has_recursion, "complexity_label": f.complexity_label}
-                    for f in complexity.functions
-                ],
-            },
-            "smells": [{"kind": s.kind, "severity": s.severity,
-                        "message": s.message, "lineno": s.lineno} for s in smells.smells],
-            "explanation": explanation,
-            "scores": {"difficulty": round(diff.score, 1), "maintainability": maint.rounded},
-        }
+                data = {
+                    "file": req.filename, "metrics": m.summary(),
+                    "complexity": {
+                        "overall_label": complexity.overall_label,
+                        "average_complexity": complexity.average_complexity,
+                        "max_complexity": complexity.max_complexity,
+                        "functions": [{"name": f.name, "cyclomatic_complexity": f.cyclomatic_complexity, "has_recursion": f.has_recursion} for f in complexity.functions],
+                    },
+                    "smells": [{"kind": s.kind, "message": s.message} for s in smells.smells],
+                    "explanation": explanation,
+                    "scores": {"difficulty": round(diff.score, 1), "maintainability": maint.rounded},
+                }
+            else:
+                engine = ExplanationEngine()
+                explanation = engine.explain(module, mode=req.mode)
+                data = {
+                    "file": req.filename, "metrics": {"total_lines": module.line_count},
+                    "complexity": {"overall_label": "Unknown", "functions": []},
+                    "smells": [], "explanation": explanation, "scores": {"difficulty": 0, "maintainability": 0},
+                }
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
 
         fmt = req.format.lower()
-        if fmt == "html":
-            content = to_html(data)
-        elif fmt == "json":
-            content = to_json(data)
-        elif fmt == "markdown":
-            content = to_markdown(data)
-        else:
-            raise HTTPException(status_code=400, detail=f"Unknown format '{fmt}'")
+        content = to_html(data) if fmt == "html" else to_json(data) if fmt == "json" else to_markdown(data)
 
         return ReportResponse(
             filename=req.filename,
@@ -237,6 +288,11 @@ def create_app() -> FastAPI:
             size_bytes=len(content.encode()),
         )
 
+    # Serve Dashboard UI
+    ui_dist = Path("ui/dist")
+    if ui_dist.exists():
+        app.mount("/", StaticFiles(directory=ui_dist, html=True), name="ui")
+    
     return app
 
 

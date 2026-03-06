@@ -14,12 +14,14 @@ class AnalysisRequest(BaseModel):
     include_complexity: bool = Field(default=True)
     include_metrics: bool = Field(default=True)
     include_scores: bool = Field(default=True)
+    source_path: Optional[str] = Field(default=None, description="Path to local file")
 
 
 class ExplainRequest(BaseModel):
     source: str = Field(..., description="Python source code to explain")
     filename: str = Field(default="<string>")
     mode: str = Field(default="developer", description="developer | beginner | fun:pirate | fun:shakespeare | fun:eli5")
+    source_path: Optional[str] = Field(default=None)
 
 
 class ReportRequest(BaseModel):
@@ -27,6 +29,7 @@ class ReportRequest(BaseModel):
     filename: str = Field(default="<string>")
     format: str = Field(default="json", description="json | html | markdown")
     mode: str = Field(default="developer")
+    source_path: Optional[str] = Field(default=None)
 
 
 class FunctionComplexityModel(BaseModel):

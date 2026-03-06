@@ -84,23 +84,16 @@ def explain(
     save: Optional[Path] = typer.Option(None, "--save", "-s", help="Save output to file"),
 ) -> None:
     """📖 Explain a Python file in human-readable language."""
-    from core.parser.ast_parser import ASTParser
-    from core.parser.node_mapper import NodeMapper
+    from core.parser.factory import UniversalParser
     from core.explainer.explanation_engine import ExplanationEngine
 
     console.print(f"\n[bold cyan]🧠 Explaining:[/bold cyan] [white]{file}[/white]")
     console.print(f"[dim]Mode: {mode}[/dim]\n")
 
     try:
-        parser = ASTParser()
-        parse_result = parser.parse_file(file)
+        parser = UniversalParser()
+        module = parser.parse_and_map(file)
 
-        if not parse_result.success:
-            for err in parse_result.errors:
-                console.print(f"[red]❌ Parse error: {err}[/red]")
-            raise typer.Exit(1)
-
-        module = NodeMapper().map(parse_result)
         engine = ExplanationEngine()
         explanation = engine.explain(module, mode=mode)
 
@@ -140,7 +133,8 @@ def analyze(
     scores: bool = typer.Option(True, "--scores/--no-scores"),
 ) -> None:
     """🔍 Analyze a Python file for complexity, smells, and metrics."""
-    from core.parser.ast_parser import ASTParser
+    from core.parser.factory import UniversalParser
+    from core.parser.ast_parser import ParseResult # still need for types
     from core.analyzer.complexity_analyzer import ComplexityAnalyzer
     from core.analyzer.code_smells import CodeSmellDetector
     from core.analyzer.metrics import MetricsComputer
@@ -151,13 +145,41 @@ def analyze(
 
     console.print(f"\n[bold cyan]🔍 Analyzing:[/bold cyan] [white]{file}[/white]\n")
 
-    parser = ASTParser()
-    parse_result = parser.parse_file(file)
-    if not parse_result.success:
-        for err in parse_result.errors:
-            console.print(f"[red]❌ {err}[/red]")
-        raise typer.Exit(1)
+    is_python = file.suffix.lower() == ".py"
+    
+    if is_python:
+        from core.parser.ast_parser import ASTParser
+        parser = ASTParser()
+        parse_result = parser.parse_file(file)
+        if not parse_result.success:
+            for err in parse_result.errors:
+                console.print(f"[red]❌ {err}[/red]")
+            raise typer.Exit(1)
+    else:
+        # For non-python, we skip deep AST analysis for now and show high-level info from ModuleNode
+        from core.parser.factory import UniversalParser
+        u_parser = UniversalParser()
+        try:
+            module = u_parser.parse_and_map(file)
+        except Exception as e:
+            console.print(f"[red]❌ {e}[/red]")
+            raise typer.Exit(1)
+        
+        console.print(f"[yellow]⚠️  Full AST analysis (Complexity/Smells) is currently Python-only.[/yellow]")
+        console.print(f"[dim]Showing high-level metrics for {file.suffix}...[/dim]\n")
+        
+        # Display high-level info from module
+        tbl = Table(title="📊 Technical Overview", box=box.ROUNDED)
+        tbl.add_column("Property")
+        tbl.add_column("Value")
+        tbl.add_row("Functions", str(len(module.functions)))
+        tbl.add_row("Classes", str(len(module.classes)))
+        tbl.add_row("Imports", str(len(module.imports)))
+        tbl.add_row("Total Lines", str(module.line_count))
+        console.print(tbl)
+        return
 
+    # ── Metrics (Python-only deep metrics for now) ──────────────────────────:
     if metrics:
         m = MetricsComputer().compute(parse_result)
         tbl = Table(title="📊 Code Metrics", box=box.ROUNDED, border_style="blue")
@@ -212,7 +234,7 @@ def visualize(
     module_tree: bool = typer.Option(True, "--tree/--no-tree"),
 ) -> None:
     """🌐 Visualize code structure, call graph, and control flow."""
-    from core.parser.ast_parser import ASTParser
+    from core.parser.factory import UniversalParser
     from core.parser.node_mapper import NodeMapper
     from core.graph.call_graph import CallGraphBuilder
     from core.graph.dependency_graph import DependencyGraphBuilder
@@ -222,17 +244,27 @@ def visualize(
 
     console.print(f"\n[bold cyan]🌐 Visualizing:[/bold cyan] [white]{file}[/white]\n")
 
-    parser = ASTParser()
-    parse_result = parser.parse_file(file)
-    if not parse_result.success:
-        for err in parse_result.errors:
-            console.print(f"[red]❌ {err}[/red]")
+    is_python = file.suffix.lower() == ".py"
+    try:
+        u_parser = UniversalParser()
+        module = u_parser.parse_and_map(file)
+    except Exception as e:
+        console.print(f"[red]❌ {e}[/red]")
         raise typer.Exit(1)
 
-    module = NodeMapper().map(parse_result)
-
+    # Module tree (supported for all)
     if module_tree:
         console.print(render_module_tree(module))
+
+    if not is_python:
+        if call_graph or control_flow or dependency_graph:
+            console.print(f"[yellow]⚠️  Advanced visualizations (Call Graph / CFG / Dependency Graph) are currently Python-only.[/yellow]")
+        return
+
+    # Python-only beyond this point
+    from core.parser.ast_parser import ASTParser
+    parser = ASTParser()
+    parse_result = parser.parse_file(file)
 
     if call_graph:
         cg = CallGraphBuilder().build(parse_result)
@@ -263,53 +295,71 @@ def report(
     open_browser: bool = typer.Option(False, "--open"),
 ) -> None:
     """📄 Generate a full analysis report."""
-    from core.parser.ast_parser import ASTParser
-    from core.parser.node_mapper import NodeMapper
-    from core.analyzer.complexity_analyzer import ComplexityAnalyzer
-    from core.analyzer.code_smells import CodeSmellDetector
-    from core.analyzer.metrics import MetricsComputer
+    from core.parser.factory import UniversalParser
     from core.explainer.explanation_engine import ExplanationEngine
-    from core.scoring.difficulty_score import DifficultyScorer
-    from core.scoring.maintainability_score import MaintainabilityScorer
     from utils.formatter import to_html, to_json, to_markdown
 
     console.print(f"\n[bold cyan]📄 {format.upper()} Report:[/bold cyan] [white]{file}[/white]\n")
 
-    parser = ASTParser()
-    parse_result = parser.parse_file(file)
-    if not parse_result.success:
-        for err in parse_result.errors:
-            console.print(f"[red]❌ {err}[/red]")
+    is_python = file.suffix.lower() == ".py"
+    try:
+        u_parser = UniversalParser()
+        module = u_parser.parse_and_map(file)
+    except Exception as e:
+        console.print(f"[red]❌ {e}[/red]")
         raise typer.Exit(1)
 
-    module = NodeMapper().map(parse_result)
-    m = MetricsComputer().compute(parse_result)
-    complexity = ComplexityAnalyzer().analyze(parse_result)
-    smells = CodeSmellDetector().detect(parse_result)
-    explanation = ExplanationEngine().explain(module, mode=mode)
-    diff = DifficultyScorer().score(complexity, smells_count=smells.total_count)
-    maint = MaintainabilityScorer().score(m, complexity)
-
-    data = {
-        "file": str(file),
-        "metrics": {**m.summary(), "async_function_count": m.async_function_count},
-        "complexity": {
-            "overall_label": complexity.overall_label,
-            "average_complexity": round(complexity.average_complexity, 2),
-            "max_complexity": complexity.max_complexity,
-            "functions": [
-                {"name": f.name, "cyclomatic_complexity": f.cyclomatic_complexity,
-                 "nesting_depth": f.nesting_depth, "loop_count": f.loop_count,
-                 "has_recursion": f.has_recursion, "complexity_label": f.complexity_label}
-                for f in complexity.functions
-            ],
-        },
-        "smells": [{"kind": s.kind, "severity": s.severity, "message": s.message, "lineno": s.lineno}
-                   for s in smells.smells],
-        "explanation": explanation,
-        "scores": {"difficulty": round(diff.score, 1), "maintainability": maint.rounded},
-    }
-
+    if is_python:
+        from core.parser.ast_parser import ASTParser
+        from core.analyzer.complexity_analyzer import ComplexityAnalyzer
+        from core.analyzer.code_smells import CodeSmellDetector
+        from core.analyzer.metrics import MetricsComputer
+        from core.scoring.difficulty_score import DifficultyScorer
+        from core.scoring.maintainability_score import MaintainabilityScorer
+        
+        parser = ASTParser()
+        parse_result = parser.parse_file(file)
+        
+        m = MetricsComputer().compute(parse_result)
+        complexity = ComplexityAnalyzer().analyze(parse_result)
+        smells = CodeSmellDetector().detect(parse_result)
+        engine = ExplanationEngine()
+        explanation = engine.explain(module, mode=mode)
+        diff = DifficultyScorer().score(complexity, smells_count=smells.total_count)
+        maint = MaintainabilityScorer().score(m, complexity)
+        
+        data = {
+            "file": str(file),
+            "metrics": {**m.summary(), "async_function_count": m.async_function_count},
+            "complexity": {
+                "overall_label": complexity.overall_label,
+                "average_complexity": round(complexity.average_complexity, 2),
+                "max_complexity": complexity.max_complexity,
+                "functions": [
+                    {"name": f.name, "cyclomatic_complexity": f.cyclomatic_complexity,
+                     "nesting_depth": f.nesting_depth, "loop_count": f.loop_count,
+                     "has_recursion": f.has_recursion, "complexity_label": f.complexity_label}
+                    for f in complexity.functions
+                ],
+            },
+            "smells": [{"kind": s.kind, "severity": s.severity, "message": s.message, "lineno": s.lineno}
+                       for s in smells.smells],
+            "explanation": explanation,
+            "scores": {"difficulty": round(diff.score, 1), "maintainability": maint.rounded},
+        }
+    else:
+        # Simplified report for non-python
+        engine = ExplanationEngine()
+        explanation = engine.explain(module, mode=mode)
+        data = {
+            "file": str(file),
+            "metrics": {"total_lines": module.line_count, "functions": len(module.functions), "classes": len(module.classes)},
+            "complexity": {"overall_label": "Unknown", "functions": []},
+            "smells": [],
+            "explanation": explanation,
+            "scores": {"difficulty": 0.0, "maintainability": 0},
+        }
+    
     fmt = format.lower()
     if fmt == "html":
         content, ext = to_html(data), ".html"
