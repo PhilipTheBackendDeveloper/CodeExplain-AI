@@ -1,160 +1,93 @@
-# CodeExplain AI 🧠
+# CodeExplain AI 🧠✨
 
-> A production-ready static code analysis and explanation engine for Python developers.
+> Understand everything. From abstract code to human stories.
 
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+**CodeExplain AI** is a premium static code analysis and narrative explanation engine. It doesn't just parse your code—it tells its story. Designed for absolute beginners and seasoned engineers alike, it transforms complex source code into friendly, jargon-free narratives.
 
----
-
-## What is CodeExplain AI?
-
-**CodeExplain AI** parses Python programs using Abstract Syntax Trees, constructs semantic representations of code structure, performs multi-layer analysis (complexity, dependencies, design quality), and generates human-readable explanations of code logic.
-
-Think: _"Explainable static analysis engine for developers."_
+![CodeExplain Dashboard](/ui/public/illustration.png)
 
 ---
 
-## Features
+## 🌟 Key Features
 
-| Feature                   | Description                                              |
-| ------------------------- | -------------------------------------------------------- |
-| 🔍 **AST Parser**         | Deep code parsing with symbol table                      |
-| 📊 **Code Analyzer**      | Complexity, dependencies, code smells, metrics           |
-| 🧠 **Explanation Engine** | Beginner, Developer, Fun (pirate/shakespeare/eli5) modes |
-| 🌐 **Graph Builder**      | Call graph, control flow, dependency graph               |
-| 🎯 **Scoring**            | Difficulty (0–10) and Maintainability (0–100) scores     |
-| 🖼️ **Visualization**      | ASCII diagrams, rich tree views, flow charts             |
-| 🖥️ **CLI**                | `codeexplain explain/analyze/visualize/report`           |
-| 🔌 **Plugin System**      | Extensible architecture for custom analyzers             |
-| 🌐 **Local API**          | FastAPI server for programmatic access                   |
-| 📄 **Reports**            | HTML, JSON, and Markdown report generation               |
+| Feature                  | Description                                                                                   |
+| :----------------------- | :-------------------------------------------------------------------------------------------- |
+| � **Story Mode AI**      | Overhauled beginner mode that uses metaphors (helpers, blueprints, recipes) to explain logic. |
+| 🖥️ **Premium Dashboard** | Clean, Peter Takra-inspired React UI with a minimal white aesthetic and 3D icons.             |
+| 🔍 **Deep Trace**        | Interactive AST mapping and semantic node inspection for deep technical insight.              |
+| 📊 **Modern Metrics**    | Live Maintainability scores, Complexity index, and Risk Factor detection (Code Smells).       |
+| 🌍 **Multi-Language**    | Native support for **Python** and best-effort semantic mapping for **TypeScript/JS**.         |
+| 🚀 **Docker Ready**      | Production-grade Dockerization with Vite 7 and FastAPI, optimized for Render/Cloud.           |
 
 ---
 
-## Installation
+## 🚀 Quick Start
 
-```bash
-git clone https://github.com/yourname/codeexplain-ai
-cd codeexplain-ai
-pip install -e ".[dev]"
+### Local Development
+
+1. **Clone the project:**
+
+   ```bash
+   git clone https://github.com/PhilipTheBackendDeveloper/CodeExplain-AI.git
+   cd CodeExplain-AI
+   ```
+
+2. **Setup the Engine (Backend):**
+
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+   pip install -r requirements.txt
+   codeexplain serve
+   ```
+
+3. **Setup the Dashboard (Frontend):**
+   ```bash
+   cd ui
+   npm install
+   npm run dev
+   ```
+
+---
+
+## 📖 AI Explanation Modes
+
+CodeExplain adapts to your level of expertise:
+
+- **Beginner (Story Mode)**: 📖 Imagine your code is a storybook. Uses analogies like "Mini-Command Helpers" and "Master Blueprints" to explain functions and classes.
+- **Developer**: 🛠️ Technical breakdown with complexity scores, docstring analysis, and structural highlights.
+- **Fun: Pirate**: 🏴‍☠️ Arr! Your code explained through the eyes of a salt-crusted sea captain.
+
+---
+
+## 🏗️ Project Structure
+
+```
+CodeExplain-AI/
+├── core/           # The Brain: AST Cleaners, Explainer Logic (Story Mode), Parsers
+├── api/            # Local REST Server (FastAPI)
+├── cli/            # Advanced CLI Tooling
+├── ui/             # Premium React Dashboard (Vite + Framer Motion)
+│   ├── src/        # Dashboard Components & Logic
+│   └── public/     # 3D Assets & Logos
+├── Dockerfile      # Production Deployment Blueprint
+└── requirements.txt
 ```
 
 ---
 
-## Quick Start
+## ☁️ Deployment
 
-```bash
-# Explain a Python file
-codeexplain explain examples/sample_code_1.py
+CodeExplain is ready for one-click deployment on platforms like **Render**.
 
-# Explain in beginner mode
-codeexplain explain examples/sample_code_1.py --mode beginner
+**Docker Build Specs:**
 
-# Explain in fun pirate mode
-codeexplain explain examples/sample_code_1.py --mode fun:pirate
-
-# Full analysis with smells and metrics
-codeexplain analyze examples/sample_code_2.py --smells --complexity --metrics
-
-# Visualize call graph
-codeexplain visualize examples/sample_code_1.py --call-graph
-
-# Generate HTML report
-codeexplain report examples/sample_code_1.py --format html --output report.html
-
-# Start local API server
-codeexplain serve
-```
+- **Frontend**: Node 20 (Vite 7)
+- **Backend**: Python 3.11-slim
+- **Port**: 8000
 
 ---
 
-## CLI Commands
+## 📜 License
 
-| Command            | Description                                |
-| ------------------ | ------------------------------------------ |
-| `explain <file>`   | Generate human-readable code explanation   |
-| `analyze <file>`   | Analyze complexity, smells, and metrics    |
-| `visualize <file>` | Render call/control-flow/dependency graphs |
-| `report <file>`    | Generate structured analysis reports       |
-| `serve`            | Start the local FastAPI server             |
-
-### Explanation Modes
-
-| Mode              | Description                                    |
-| ----------------- | ---------------------------------------------- |
-| `developer`       | Technical analysis with complexity notes       |
-| `beginner`        | Friendly, jargon-free with analogies           |
-| `fun:pirate`      | Arr, matey! Code explained pirate-style        |
-| `fun:shakespeare` | Hark! What code through yonder function breaks |
-| `fun:eli5`        | Explain like I'm 5                             |
-
----
-
-## Local API
-
-Start the server:
-
-```bash
-codeexplain serve
-```
-
-Endpoints:
-
-- `GET  /health` — Health check
-- `POST /analyze` — Analyze source code
-- `POST /explain` — Explain source code
-- `POST /report` — Generate report
-
----
-
-## Plugin System
-
-Create a custom plugin:
-
-```python
-from plugins.base_plugin import BasePlugin, PluginResult
-
-class MySecurityPlugin(BasePlugin):
-    name = "security_scanner"
-    version = "1.0.0"
-    description = "Scans for security issues"
-
-    def analyze(self, code_nodes):
-        # your analysis logic here
-        return PluginResult(name=self.name, findings=["eval() detected"])
-```
-
-Drop it in the `plugins/` directory — it's auto-discovered.
-
----
-
-## Project Structure
-
-```
-codeexplain-ai/
-├── core/          # Parser, analyzer, explainer, graph, scoring
-├── cli/           # CLI commands (typer + rich)
-├── api/           # FastAPI local server
-├── visualization/ # ASCII + rich diagrams
-├── plugins/       # Plugin system
-├── utils/         # File loader, logger, formatter, helpers
-├── config/        # YAML configuration
-├── tests/         # pytest test suite
-├── examples/      # Sample Python files for demo
-└── docs/          # Architecture, usage, API reference
-```
-
----
-
-## Running Tests
-
-```bash
-pytest tests/ -v --cov=core --cov-report=term-missing
-```
-
----
-
-## License
-
-MIT © CodeExplain AI Team
+MIT © [Philip The Backend Developer](https://github.com/PhilipTheBackendDeveloper)
