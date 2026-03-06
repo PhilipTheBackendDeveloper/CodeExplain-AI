@@ -67,6 +67,7 @@ body {
   overflow-y: auto;
   padding: 20px;
   background: var(--bg-color);
+  min-width: 0; /* Critical for grid children */
 }
 
 @media (min-width: 1024px) {
@@ -81,6 +82,9 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 12px;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
 }
 
 /* Components */
@@ -95,8 +99,8 @@ body {
 }
 
 .sidebar-logo {
-  width: 44px;
-  height: 44px;
+  width: 32px;
+  height: 32px;
   object-fit: contain;
 }
 
@@ -140,6 +144,7 @@ body {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
   gap: 20px;
+  width: 100%;
 }
 
 @media (min-width: 1280px) {
@@ -148,11 +153,11 @@ body {
   }
 }
 
-.col-12 { grid-column: span 12; }
-.col-8 { grid-column: span 12; }
-.col-7 { grid-column: span 12; }
-.col-5 { grid-column: span 12; }
-.col-4 { grid-column: span 12; }
+.col-12 { grid-column: span 12; width: 100%; min-width: 0; }
+.col-8 { grid-column: span 12; width: 100%; min-width: 0; }
+.col-7 { grid-column: span 12; width: 100%; min-width: 0; }
+.col-5 { grid-column: span 12; width: 100%; min-width: 0; }
+.col-4 { grid-column: span 12; width: 100%; min-width: 0; }
 
 @media (min-width: 1024px) {
   .col-8 { grid-column: span 8; }
@@ -243,7 +248,7 @@ h1, h2, h3, h4 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px;
+  max-width: 250px;
 }
 
 .btn-premium {
@@ -271,6 +276,7 @@ h1, h2, h3, h4 {
   border: 1px solid var(--border-color);
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  width: 100%;
 }
 
 .glass-card:hover {
@@ -292,9 +298,10 @@ h1, h2, h3, h4 {
 
 /* Logic for the simplified explanation text */
 .explanation-text p {
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
   line-height: 1.8;
   color: #374151;
+  font-size: 15px;
 }
 
 .explanation-text strong {
@@ -310,4 +317,11 @@ h1, h2, h3, h4 {
   gap: 8px;
   margin-top: 2rem;
   margin-bottom: 1rem;
+}
+
+.explanation-text .hr {
+  height: 1px;
+  background: var(--border-color);
+  margin: 40px 0;
+  width: 100%;
 }
