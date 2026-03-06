@@ -90,7 +90,7 @@ const ReadableExplanation = ({ text }) => {
         }
 
         return (
-          <p key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <p key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start', wordBreak: 'break-word' }}>
             {icon && <span style={{ marginTop: '4px', flexShrink: 0 }}>{icon}</span>}
             <span dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
           </p>
@@ -288,7 +288,7 @@ function App() {
               <div style={{width: '6px', height: '6px', borderRadius: '50%', background: error ? 'var(--danger)' : '#10b981'}} />
               <span style={{fontSize: '11px', fontWeight: 700}}>{error ? 'Engine Fault' : 'Ready'}</span>
            </div>
-           <p style={{fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4}}>Parsing local project files with advanced AST mappings.</p>
+           <p style={{fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4}}>Engine v1.2 — Story-Mode Active. (Run <code>npm build</code> to sync changes).</p>
         </div>
       </div>
 
@@ -435,8 +435,8 @@ function App() {
                   </div>
                 </div>
 
-                {/* Side Insights Column - Clean vertical flow */}
-                <div className="col-5" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
+                {/* Side Insights Column - Responsive & Robust */}
+                <div className="col-5" style={{ display: 'flex', flexDirection: 'column', gap: '32px', minWidth: 0, overflowX: 'hidden' }}>
                   
                   {/* Risks */}
                   <div style={{ width: '100%' }}>
