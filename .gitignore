@@ -51,7 +51,7 @@ htmlcov/
 .nox/
 
 # Reports (generated)
-*.html
+# *.html  <-- Allowed for index.html
 # *.json  <-- Removed this to allow package.json
 report_*
 
