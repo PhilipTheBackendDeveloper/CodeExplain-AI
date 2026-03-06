@@ -7,10 +7,27 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-// --- Simplified Components ---
+// --- Takra 3D Components ---
+
+const FloatingSculpture = () => (
+  <div className="bg-sculpture">
+    <motion.div 
+      className="floating-shape"
+      animate={{ y: [0, -30, 0], rotate: [0, 45, 0] }}
+      transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+      style={{ width: '300px', height: '300px', top: '10%', left: '-50px' }}
+    />
+    <motion.div 
+      className="floating-shape"
+      animate={{ y: [0, 40, 0], rotate: [0, -30, 0] }}
+      transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+      style={{ width: '400px', height: '400px', bottom: '5%', right: '-100px' }}
+    />
+  </div>
+);
 
 const Badge = ({ children, color = "var(--text-secondary)" }) => (
-  <span className="badge" style={{ border: `1px solid ${color}22`, color }}>
+  <span className="badge" style={{ border: `1px solid ${color}22`, color, background: 'white', fontWeight: 700, borderRadius: '8px' }}>
     {children}
   </span>
 );
@@ -20,19 +37,21 @@ const Modal = ({ isOpen, onClose, title, children }) => (
     {isOpen && (
       <motion.div 
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
+        style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.1)', backdropFilter: 'blur(8px)', zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}
         onClick={onClose}
       >
         <motion.div 
-          initial={{ scale: 0.95, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.95, y: 20 }}
-          style={{ background: 'white', width: '100%', maxWidth: '800px', borderRadius: '16px', overflow: 'hidden', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)' }}
+          initial={{ scale: 0.9, y: 40 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 40 }}
+          transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          className="modal-3d"
+          style={{ width: '100%', maxWidth: '900px', borderRadius: '32px', overflow: 'hidden' }}
           onClick={e => e.stopPropagation()}
         >
-          <div style={{ padding: '24px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800 }}>{title}</h3>
-            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}><X size={24} /></button>
+          <div style={{ padding: '32px', borderBottom: '1px solid var(--border-color)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h3 style={{ fontSize: '1.5rem', fontWeight: 800 }}>{title}</h3>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)' }}><X size={28} /></button>
           </div>
-          <div style={{ padding: '32px', maxHeight: '70vh', overflowY: 'auto' }}>
+          <div style={{ padding: '40px', maxHeight: '75vh', overflowY: 'auto' }}>
             {children}
           </div>
         </motion.div>
@@ -41,56 +60,40 @@ const Modal = ({ isOpen, onClose, title, children }) => (
   </AnimatePresence>
 );
 
-const ErrorState = ({ message, onRetry }) => (
-  <div style={{
-    height: '60vh', display: 'flex', flexDirection: 'column', 
-    alignItems: 'center', justifyContent: 'center', gap: '32px', textAlign: 'center'
-  }}>
-    <div style={{
-      width: '80px', height: '80px', borderRadius: '50%', background: '#fee2e2',
-      display: 'flex', alignItems: 'center', justifyContent: 'center'
-    }}>
-      <XCircle size={40} color="var(--danger)" />
+const MetricBox = ({ icon: Icon, value, label, color = "#6b7280" }) => (
+  <motion.div 
+    className="metric-item"
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ type: "spring", damping: 20 }}
+  >
+    <div style={{ width: '44px', height: '44px', background: 'white', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '16px', boxShadow: 'var(--shadow-3d-sm)', border: '1px solid var(--border-color)' }}>
+      <Icon size={20} color={color} />
     </div>
-    <div>
-      <h3 style={{fontSize: '1.75rem', marginBottom: '8px'}}>Analysis Interrupted</h3>
-      <p style={{color: 'var(--text-secondary)', maxWidth: '400px', margin: '0 auto', fontSize: '15px'}}>{message}</p>
-    </div>
-    <button className="btn-premium btn-primary" onClick={onRetry} style={{display: 'flex', alignItems: 'center', gap: '8px'}}>
-      <RefreshCw size={18} /> Retry Engine
-    </button>
-  </div>
+    <div className="metric-value">{value}</div>
+    <div className="metric-label">{label}</div>
+  </motion.div>
 );
 
-// Helper to format AI text with modern icons/metaphors
 const ReadableExplanation = ({ text }) => {
   if (!text) return null;
-  
-  // Split by double newline to detect sections, then process paragraphs
   const paragraphs = text.split('\n').filter(p => p.trim());
-  
   return (
     <div className="explanation-text">
       {paragraphs.map((para, i) => {
-        // If it's a separator line from backend
         if (para === '---') return <div key={i} className="hr" />;
-
         let icon = null;
         const lowPara = para.toLowerCase();
-        
-        // Only add icon if the line doesn't ALREADY start with an emoji (prevent doubling)
         const hasEmoji = /^[\u2700-\u27bf]|[\u1f300-\u1f64f]|[\u1f680-\u1f6ff]|[\u1f1e0-\u1f1ff]/.test(para);
-
         if (!hasEmoji) {
-          if (lowPara.includes('mini-command')) icon = <Zap size={18} color="var(--accent-color)" />;
-          if (lowPara.includes('blueprint')) icon = <Box size={18} color="#0284c7" />;
-          if (lowPara.includes('helper')) icon = <Sparkles size={18} color="#f59e0b" />;
-          if (lowPara.includes('note from the creator')) icon = <Info size={18} color="#6366f1" />;
-          if (lowPara.includes('big picture')) icon = <LayoutDashboard size={18} color="#0d9488" />;
+          if (lowPara.includes('mini-command') || lowPara.includes('instruction')) icon = <Zap size={20} color="var(--accent-color)" />;
+          if (lowPara.includes('blueprint') || lowPara.includes('class')) icon = <Box size={20} color="#0284c7" />;
+          if (lowPara.includes('helper') || lowPara.includes('job')) icon = <Sparkles size={20} color="#f59e0b" />;
+          if (lowPara.includes('note') || lowPara.includes('author')) icon = <Info size={20} color="#6366f1" />;
+          if (lowPara.includes('picture') || lowPara.includes('chapter')) icon = <LayoutDashboard size={20} color="#0d9488" />;
         }
-
         return (
-          <p key={i} style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+          <p key={i} style={{ display: 'flex', gap: '18px', alignItems: 'flex-start' }}>
             {icon && <span style={{ marginTop: '4px', flexShrink: 0 }}>{icon}</span>}
             <span dangerouslySetInnerHTML={{ __html: para.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') }} />
           </p>
@@ -113,9 +116,7 @@ function App() {
   const [showTrace, setShowTrace] = useState(false);
   const fileInputRef = React.useRef(null);
 
-  useEffect(() => {
-    fetchFiles();
-  }, []);
+  useEffect(() => { fetchFiles(); }, []);
 
   const fetchFiles = () => {
     fetch('/api/files')
@@ -134,161 +135,107 @@ function App() {
     setExplanation('');
     setSelectedFile(file);
     setSidebarOpen(false);
-
     try {
       const contentRes = await fetch(`/api/file-content?path=${encodeURIComponent(file.path)}`);
-      if (!contentRes.ok) throw new Error("Failed to read file content.");
       const contentData = await contentRes.json();
       setFileContent(contentData.content || '');
-
       const analyzeRes = await fetch('/analyze', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source: contentData.content,
-          filename: file.name,
-          source_path: file.path
-        })
+        body: JSON.stringify({ source: contentData.content, filename: file.name, source_path: file.path })
       });
-      
       const analyzeData = await analyzeRes.json();
-      if (!analyzeRes.ok) throw new Error(analyzeData.detail || "Analysis engine error.");
       setAnalysis(analyzeData);
-
       const explainRes = await fetch('/explain', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          source: contentData.content,
-          filename: file.name,
-          source_path: file.path,
-          mode: mode
-        })
+        body: JSON.stringify({ source: contentData.content, filename: file.name, source_path: file.path, mode: mode })
       });
-      
       const explainData = await explainRes.json();
-      if (!explainRes.ok) throw new Error(explainData.detail || "Explanation engine error.");
-      setExplanation(explainData.explanation || 'No explanation generated.');
-
+      setExplanation(explainData.explanation || '');
     } catch (err) {
-      console.error("Operation failed", err);
       setError(err.message);
     } finally {
       setLoading(false);
     }
   };
-
-  const handleFileUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      const formData = new FormData();
-      formData.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: formData });
-      if (!res.ok) throw new Error("Upload failed.");
-      const data = await res.json();
-      await handleSelectFile(data);
-      fetchFiles();
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-      if (fileInputRef.current) fileInputRef.current.value = '';
-    }
-  };
-
-  useEffect(() => {
-    if (selectedFile && !loading && !error) {
-       const fetchExplanation = async () => {
-         setLoading(true);
-         try {
-           const res = await fetch('/explain', {
-             method: 'POST',
-             headers: { 'Content-Type': 'application/json' },
-             body: JSON.stringify({
-               source: fileContent,
-               filename: selectedFile.name,
-               source_path: selectedFile.path,
-               mode: mode
-             })
-           });
-           const data = await res.json();
-           if (res.ok) setExplanation(data.explanation || '');
-         } catch (e) { console.error(e); }
-         setLoading(false);
-       };
-       fetchExplanation();
-    }
-  }, [mode]);
 
   return (
     <div className="app-container">
+      <FloatingSculpture />
+
       {/* Sidebar Mobile Toggle */}
       <button 
         onClick={() => setSidebarOpen(!sidebarOpen)}
-        style={{ position: 'fixed', top: '20px', left: '20px', zIndex: 60, background: 'white', border: '1px solid var(--border-color)', borderRadius: '8px', padding: '10px', display: 'flex', alignItems: 'center', boxShadow: 'var(--shadow-md)' }}
+        style={{ position: 'fixed', top: '24px', left: '24px', zIndex: 60, background: 'white', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '12px', display: 'flex', alignItems: 'center', boxShadow: 'var(--shadow-3d-md)' }}
         className="lg-toggle"
       >
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
 
       {/* Sidebar Overlay */}
-      {sidebarOpen && <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.2)', zIndex: 45 }} onClick={() => setSidebarOpen(false)} />}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.05)', backdropFilter: 'blur(4px)', zIndex: 45 }} 
+            onClick={() => setSidebarOpen(false)} 
+          />
+        )}
+      </AnimatePresence>
 
       {/* Sidebar */}
       <div className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         <div className="sidebar-header">
           <div className="logo-container">
-            <img src="/logo.png" alt="CodeExplain" className="sidebar-logo" />
+            <motion.img 
+              src="/logo.png" 
+              alt="CodeExplain" 
+              className="sidebar-logo" 
+              animate={{ rotateY: [0, 360] }}
+              transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
+            />
             <div>
-              <h1 style={{fontSize: '1.2rem', fontWeight: 800}}>CodeExplain</h1>
-              <span style={{fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase'}}>Autonomous AI</span>
+              <h1 style={{fontSize: '1.3rem', fontWeight: 800}}>CodeExplain</h1>
+              <span style={{fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 800, letterSpacing: '0.15em', textTransform: 'uppercase'}}>Autonomous AI</span>
             </div>
           </div>
         </div>
 
         <div className="file-list">
-          <div style={{padding: '0 16px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
-            <span style={{fontSize: '11px', fontWeight: 700, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.1em'}}>Explorer</span>
-            <button 
-              onClick={() => fileInputRef.current?.click()}
-              style={{
-                background: 'white', color: 'var(--text-primary)', border: '1px solid var(--border-color)', borderRadius: '6px',
-                padding: '4px 8px', fontSize: '10px', fontWeight: 700, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px',
-                boxShadow: 'var(--shadow-sm)'
-              }}
-            >
-              <UploadCloud size={12} /> UPLOAD
-            </button>
-            <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileUpload} accept=".py,.js,.jsx,.ts,.tsx" />
+          <div style={{padding: '0 20px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
+            <span style={{fontSize: '11px', fontWeight: 800, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.15em'}}>Project Engine</span>
           </div>
 
-          {files.length > 0 ? files.map(file => (
-            <button
-              key={file.path}
-              onClick={() => handleSelectFile(file)}
-              className={`file-item ${selectedFile?.path === file.path ? 'active' : ''}`}
+          <div style={{ padding: '0 12px 24px' }}>
+            <button 
+              onClick={() => fileInputRef.current?.click()}
+              className="btn-premium"
+              style={{ width: '100%', justifyContent: 'center', marginBottom: '32px', background: 'white' }}
             >
-              <FileCode size={16} color={selectedFile?.path === file.path ? 'var(--accent-color)' : 'var(--text-secondary)'} />
-              <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{file.name}</span>
-              {selectedFile?.path === file.path && <ChevronRight size={14} style={{marginLeft: 'auto'}} />}
+              <UploadCloud size={16} /> NEW ANALYSIS
             </button>
-          )) : (
-            <div style={{ padding: '40px 20px', textAlign: 'center', color: 'var(--text-tertiary)' }}>
-              <p style={{ fontSize: '12px' }}>No files found in project root.</p>
-            </div>
-          )}
+            <input type="file" ref={fileInputRef} style={{ display: 'none' }} onChange={(e) => {}} accept=".py,.js,.jsx,.ts,.tsx" />
+
+            {files.map(file => (
+              <button
+                key={file.path}
+                onClick={() => handleSelectFile(file)}
+                className={`file-item ${selectedFile?.path === file.path ? 'active' : ''}`}
+              >
+                <FileCode size={18} color={selectedFile?.path === file.path ? 'var(--accent-color)' : 'var(--text-secondary)'} />
+                <span style={{overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap'}}>{file.name}</span>
+              </button>
+            ))}
+          </div>
         </div>
 
-        <div style={{padding: '24px', borderTop: '1px solid var(--border-color)', margin: '0 12px 12px'}}>
+        <div style={{padding: '32px', background: 'rgba(255,255,255,0.4)', borderRadius: '24px', margin: '0 16px 16px', border: '1px solid var(--border-color)'}}>
            <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px'}}>
-              <div style={{width: '6px', height: '6px', borderRadius: '50%', background: error ? 'var(--danger)' : '#10b981'}} />
-              <span style={{fontSize: '11px', fontWeight: 700}}>{error ? 'Engine Fault' : 'Ready'}</span>
+              <div style={{width: '8px', height: '8px', borderRadius: '50%', background: '#10b981', boxShadow: '0 0 10px #10b98155'}} />
+              <span style={{fontSize: '12px', fontWeight: 800}}>Takra Engine v1.2</span>
            </div>
-           <p style={{fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4}}>Parsing local project files with advanced AST mappings.</p>
+           <p style={{fontSize: '11px', color: 'var(--text-secondary)', lineHeight: 1.5}}>Ready for 3D structural mapping.</p>
         </div>
       </div>
 
@@ -298,260 +245,199 @@ function App() {
         {selectedFile ? (
           <motion.div 
             key={selectedFile.path}
-            initial={{opacity: 0, x: 20}}
-            animate={{opacity: 1, x: 0}}
-            exit={{opacity: 0, x: -20}}
-            transition={{duration: 0.4, ease: [0.22, 1, 0.36, 1]}}
-            style={{maxWidth: '1200px', margin: '0 auto', width: '100%', paddingBottom: '60px'}}
+            initial={{opacity: 0, y: 30}}
+            animate={{opacity: 1, y: 0}}
+            exit={{opacity: 0, y: -30}}
+            transition={{ type: "spring", damping: 25 }}
+            style={{maxWidth: '1300px', margin: '0 auto', width: '100%', paddingBottom: '100px'}}
           >
             {/* Header */}
-            <div style={{display: 'flex', flexDirection: 'column', gap: '24px', marginBottom: '48px', paddingTop: '40px'}}>
-               <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: '24px' }}>
-                  <div style={{ flex: 1, minWidth: '280px' }}>
-                    <h2 style={{fontSize: 'clamp(2rem, 5vw, 3rem)', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1}}>{selectedFile.name}</h2>
-                    <div style={{display: 'flex', flexWrap: 'wrap', gap: '12px', marginTop: '12px'}}>
-                      <Badge>{selectedFile.path}</Badge>
-                      {analysis?.metrics?.total_lines && <Badge color="var(--accent-color)">{analysis.metrics.total_lines} LINES OF CODE</Badge>}
-                    </div>
-                  </div>
-                  <div style={{display: 'flex', gap: '4px', background: '#f3f4f6', padding: '4px', borderRadius: '12px', height: 'fit-content'}}>
-                    {['beginner', 'developer', 'fun:pirate'].map(m => (
-                      <button 
-                        key={m}
-                        onClick={() => setMode(m)}
-                        style={{
-                          padding: '10px 18px', borderRadius: '9px', fontSize: '11px', fontWeight: 700, border: 'none', cursor: 'pointer',
-                          background: mode === m ? 'white' : 'transparent',
-                          color: mode === m ? 'black' : 'var(--text-secondary)',
-                          boxShadow: mode === m ? 'var(--shadow-sm)' : 'none',
-                          transition: 'all 0.2s'
-                        }}
-                      >
-                        {m.split(':')[1]?.toUpperCase() || m.toUpperCase()}
-                      </button>
-                    ))}
-                  </div>
+            <div style={{display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'flex-end', gap: '32px', marginBottom: '60px', paddingTop: '20px'}}>
+               <div style={{ flex: 1, minWidth: '300px' }}>
+                 <motion.h2 layoutId="title" style={{fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, letterSpacing: '-0.05em', lineHeight: 1}}>{selectedFile.name}</motion.h2>
+                 <div style={{display: 'flex', flexWrap: 'wrap', gap: '16px', marginTop: '20px'}}>
+                   <Badge>{selectedFile.path}</Badge>
+                   {analysis?.metrics?.total_lines && <Badge color="var(--accent-color)">{analysis.metrics.total_lines} SOURCE LINES</Badge>}
+                 </div>
+               </div>
+               <div style={{display: 'flex', gap: '6px', background: '#f5f5f5', padding: '6px', borderRadius: '18px', boxShadow: 'var(--bevel-light)'}}>
+                 {['beginner', 'developer', 'fun:pirate'].map(m => (
+                   <button 
+                     key={m}
+                     onClick={() => setMode(m)}
+                     style={{
+                       padding: '12px 24px', borderRadius: '14px', fontSize: '11px', fontWeight: 800, border: 'none', cursor: 'pointer',
+                       background: mode === m ? 'white' : 'transparent',
+                       color: mode === m ? 'black' : 'var(--text-tertiary)',
+                       boxShadow: mode === m ? 'var(--shadow-3d-sm)' : 'none',
+                       transition: 'all 0.3s cubic-bezier(0.2, 0, 0, 1)'
+                     }}
+                   >
+                     {m.split(':')[1]?.toUpperCase() || m.toUpperCase()}
+                   </button>
+                 ))}
                </div>
             </div>
 
-            {error ? (
-              <ErrorState message={error} onRetry={() => handleSelectFile(selectedFile)} />
-            ) : (
-              <div className="dashboard-grid">
-                
-                {/* Hero Illustration Card */}
-                <div className="col-8 white-panel" style={{padding: '0', position: 'relative', overflow: 'hidden', minHeight: '380px', background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', display: 'flex', alignItems: 'center'}}>
-                   <div style={{padding: 'clamp(32px, 6vw, 64px)', flex: 1, position: 'relative', zIndex: 1}}>
-                      <div className="metric-label" style={{color: '#0369a1', marginBottom: '20px'}}>Source Context</div>
-                      <h3 style={{fontSize: '2.5rem', marginBottom: '16px', lineHeight: 1.1}}>Structural Insight</h3>
-                      <p style={{color: '#334155', maxWidth: '340px', lineHeight: 1.7, fontSize: '16px'}}>
-                        Our engine detected <strong>{analysis?.metrics?.function_count || 0} functions</strong> and <strong>{analysis?.metrics?.class_count || 0} structures</strong> in this specific module.
-                      </p>
-                      <button 
-                        className="btn-premium btn-primary" 
-                        style={{marginTop: '32px', background: '#0369a1', padding: '12px 28px'}}
-                        onClick={() => setShowTrace(true)}
-                      >
-                         View Deep Trace
-                      </button>
-                   </div>
-                   <div style={{position: 'absolute', right: '10px', bottom: '-20px', width: '420px', height: '420px', opacity: loading ? 0.3 : 1, transition: 'opacity 0.5s'}} className="hero-img">
-                      <img src="/illustration.png" alt="Illustration" style={{width: '100%', height: '100%', objectFit: 'contain'}} />
-                   </div>
-                   {loading && (
-                      <div style={{position: 'absolute', inset: 0, background: 'rgba(255,255,255,0.7)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 10}}>
-                         <div className="premium-loader" />
-                      </div>
-                   )}
-                </div>
-
-                {/* Score Panel */}
-                <div className="col-4 white-panel" style={{padding: '48px 32px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
-                      <div className="metric-label" style={{marginBottom: '24px'}}>Health Index</div>
-                      <div style={{position: 'relative', width: '160px', height: '160px', margin: '0 auto 24px'}}>
-                         <svg width="160" height="160" viewBox="0 0 120 120" style={{transform: 'rotate(-90deg)'}}>
-                           <circle cx="60" cy="60" r="54" fill="none" stroke="#f3f4f6" strokeWidth="8"/>
-                           <circle cx="60" cy="60" r="54" fill="none" stroke={ (analysis?.scores?.maintainability || 0) > 70 ? "#10b981" : "var(--accent-color)" } strokeWidth="8" strokeDasharray="339.3" 
-                              strokeDashoffset={339.3 - (339.3 * (analysis?.scores?.maintainability || 0) / 100)}
-                              style={{transition: 'stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1)'}}
-                           />
-                         </svg>
-                         <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '42px', fontWeight: 900}}>
-                            {analysis?.scores?.maintainability || 0}<span style={{fontSize: '18px', fontWeight: 600, color: 'var(--text-tertiary)'}}>%</span>
-                         </div>
-                      </div>
-                      <div style={{fontSize: '14px', color: (analysis?.scores?.maintainability || 0) > 70 ? '#10b981' : 'var(--accent-color)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.1em'}}>
-                        {analysis?.scores?.maintainability_label || 'COMPUTING'}
-                      </div>
-                </div>
-
-                {/* Metrics */}
-                <div className="col-8 white-panel metrics-row">
-                    <div className="metric-item">
-                      <Layers size={22} color="#6b7280" style={{marginBottom: '14px'}} />
-                      <div className="metric-value">{analysis?.metrics?.total_lines || 0}</div>
-                      <div className="metric-label">LOC</div>
-                    </div>
-                    <div style={{width: '1px', height: '50px', background: 'var(--border-color)'}} className="metric-sep" />
-                    <div className="metric-item">
-                      <Code2 size={22} color="#6b7280" style={{marginBottom: '14px'}} />
-                      <div className="metric-value">{analysis?.metrics?.function_count || analysis?.complexity?.functions?.length || 0}</div>
-                      <div className="metric-label">Methods</div>
-                    </div>
-                    <div style={{width: '1px', height: '50px', background: 'var(--border-color)'}} className="metric-sep" />
-                    <div className="metric-item">
-                      <AlertTriangle size={22} color="#f59e0b" style={{marginBottom: '14px'}} />
-                      <div className="metric-value">{analysis?.smells?.length || 0}</div>
-                      <div className="metric-label">Smells</div>
-                    </div>
-                    <div style={{width: '1px', height: '50px', background: 'var(--border-color)'}} className="metric-sep" />
-                    <div className="metric-item">
-                      <BookOpen size={22} color="#6b7280" style={{marginBottom: '14px'}} />
-                      <div className="metric-value">{Math.round((analysis?.metrics?.comment_ratio || 0) * 100)}%</div>
-                      <div className="metric-label">Docs</div>
-                    </div>
-                </div>
-
-                {/* Complexity Card */}
-                <div className="col-4 white-panel" style={{padding: '40px 32px', textAlign: 'center', borderTop: '6px solid var(--accent-color)'}}>
-                      <div className="metric-label" style={{marginBottom: '12px'}}>Complexity</div>
-                      <div style={{fontSize: '5rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.06em', lineHeight: 0.9, transition: 'all 0.5s'}}>
-                        {analysis?.complexity?.average_complexity || 0}
-                      </div>
-                      <div style={{fontSize: '12px', color: 'var(--text-tertiary)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: '16px'}}>
-                        {analysis?.complexity?.overall_label || 'STABLE'}
-                      </div>
-                </div>
-
-                {/* AI Explanation */}
-                <div className="col-7">
-                  <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px'}}>
-                    <Sparkles size={18} color="var(--accent-color)" />
-                    <span className="metric-label" style={{color: 'var(--text-primary)', fontSize: '13px'}}>AI Narrative Report</span>
-                  </div>
-                  <div className="white-panel" style={{padding: 'clamp(24px, 6vw, 64px)', minHeight: '500px', position: 'relative'}}>
-                    <ReadableExplanation text={explanation} />
-                    {!explanation && !loading && <div style={{ textAlign: 'center', padding: '100px 0' }}><p style={{color: 'var(--text-tertiary)', fontStyle: 'italic'}}>Select a file to generate a narrative story...</p></div>}
-                  </div>
-                </div>
-
-                {/* Side Insights Column - Clean vertical flow */}
-                <div className="col-5" style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-                  
-                  {/* Risks */}
-                  <div style={{ width: '100%' }}>
-                     <div style={{display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px'}}>
-                        <Shield size={18} color="var(--text-primary)" />
-                        <span className="metric-label" style={{color: 'var(--text-primary)', fontSize: '13px'}}>Risk Factors</span>
-                     </div>
-                     <div style={{display: 'flex', flexDirection: 'column', gap: '20px'}}>
-                        {analysis?.smells?.length > 0 ? analysis.smells.slice(0, 4).map((smell, i) => (
-                          <div key={i} className="glass-card" style={{padding: '24px'}}>
-                             <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '10px'}}>
-                                <span style={{fontSize: '13px', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', color: smell.severity === 'high' ? 'var(--danger)' : 'var(--text-primary)'}}>
-                                  {smell.kind.replace(/_/g, ' ')}
-                                </span>
-                                <Badge>L{smell.lineno}</Badge>
-                             </div>
-                             <p style={{fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.6}}>{smell.message}</p>
-                          </div>
-                        )) : (
-                          <div className="white-panel" style={{padding: '64px 32px', textAlign: 'center', borderStyle: 'dashed'}}>
-                             <Activity size={40} color="#10b981" style={{opacity: 0.3, marginBottom: '20px'}} />
-                             <p style={{fontSize: '14px', fontWeight: 700, color: '#10b981', letterSpacing: '0.05em'}}>ARCHITECTURE OPTIMIZED</p>
-                          </div>
-                        )}
-                     </div>
-                  </div>
-
-                  {/* Insight Detail Card */}
-                  <div className="white-panel" style={{padding: '40px 32px', background: 'linear-gradient(to bottom right, #ffffff, #f9fafb)', position: 'relative', overflow: 'hidden', minWidth: '0'}}>
-                     <h4 style={{fontSize: '18px', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '10px'}}>
-                        <Compass size={22} color="var(--accent-color)" /> Insight Detail
-                     </h4>
-                     <p style={{fontSize: '15px', color: 'var(--text-secondary)', lineHeight: 1.8, position: 'relative', zIndex: 1}}>
-                        Our specialized <strong>Engine v1.2</strong> identified structural patterns using recursive descent parsing. 
-                        The maintainability score is computed relative to the Weighted Micro-Function Complexity.
-                     </p>
-                     <div style={{position: 'absolute', right: '-20px', bottom: '-20px', opacity: 0.05}} className="hidden md:block">
-                        <BarChart3 size={140} />
-                     </div>
-                  </div>
-                </div>
-
+            <div className="dashboard-grid">
+              
+              {/* Hero Card - Sculptural */}
+              <div className="col-8 white-panel" style={{minHeight: '440px', display: 'flex', alignItems: 'center', background: 'radial-gradient(circle at top left, #fff, #fafafa)'}}>
+                 <div style={{padding: 'clamp(40px, 8vw, 80px)', flex: 1, position: 'relative', zIndex: 1}}>
+                    <div className="metric-label" style={{color: 'var(--accent-color)', marginBottom: '24px'}}>Abstract Mapping</div>
+                    <h3 style={{fontSize: '3rem', marginBottom: '24px', lineHeight: 1}}>Structural Sculpting</h3>
+                    <p style={{color: 'var(--text-secondary)', maxWidth: '400px', lineHeight: 1.8, fontSize: '17px'}}>
+                       Observed <strong>{analysis?.metrics?.function_count || 0} logical behaviors</strong> and <strong>{analysis?.metrics?.class_count || 0} core templates</strong>.
+                    </p>
+                    <button 
+                      className="btn-premium btn-primary" 
+                      style={{marginTop: '40px', padding: '16px 36px', fontSize: '15px'}}
+                      onClick={() => setShowTrace(true)}
+                    >
+                       View Engine Trace
+                    </button>
+                 </div>
+                 <div style={{position: 'absolute', right: '0', bottom: '-40px', width: '500px', height: '500px'}} className="hero-img">
+                    <img src="/illustration.png" alt="Illustration" style={{width: '100%', height: '100%', objectFit: 'contain'}} />
+                 </div>
               </div>
-            )}
+
+              {/* Health Score - Takra 3D */}
+              <div className="col-4 white-panel" style={{display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '60px 40px'}}>
+                    <div className="metric-label" style={{marginBottom: '40px'}}>Calculated Health</div>
+                    <div style={{position: 'relative', width: '200px', height: '200px'}}>
+                       <motion.div 
+                         style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: 'white', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-3d-lg), var(--bevel-heavy)'}}
+                         animate={{ scale: [1, 1.02, 1] }} transition={{ duration: 4, repeat: Infinity }}
+                       />
+                       <svg width="200" height="200" viewBox="0 0 120 120" style={{transform: 'rotate(-90deg)', position: 'relative', zIndex: 1}}>
+                         <circle cx="60" cy="60" r="50" fill="none" stroke="#f8f8f8" strokeWidth="6"/>
+                         <motion.circle cx="60" cy="60" r="50" fill="none" stroke="var(--accent-color)" strokeWidth="6" strokeDasharray="314" 
+                            initial={{ strokeDashoffset: 314 }}
+                            animate={{ strokeDashoffset: 314 - (314 * (analysis?.scores?.maintainability || 0) / 100) }}
+                            transition={{ duration: 2, ease: "easeOut" }}
+                         />
+                       </svg>
+                       <div style={{position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '56px', fontWeight: 900, letterSpacing: '-0.05em'}}>
+                          {analysis?.scores?.maintainability || 0}
+                       </div>
+                    </div>
+                    <div style={{fontSize: '14px', color: 'var(--text-primary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '32px'}}>
+                      {analysis?.scores?.maintainability_label || 'COMPUTING'}
+                    </div>
+              </div>
+
+              {/* Metrics Bar */}
+              <div className="col-8 white-panel metrics-row" style={{ height: 'auto', padding: '40px' }}>
+                  <MetricBox icon={Layers} value={analysis?.metrics?.total_lines || 0} label="Lines" />
+                  <MetricBox icon={Code2} value={analysis?.metrics?.function_count || 0} label="Tricks" />
+                  <MetricBox icon={AlertTriangle} value={analysis?.smells?.length || 0} label="Flaws" color="var(--danger)" />
+                  <MetricBox icon={BookOpen} value={`${Math.round((analysis?.metrics?.comment_ratio || 0) * 100)}%`} label="Story" />
+              </div>
+
+              {/* Complexity Card */}
+              <div className="col-4 white-panel" style={{padding: '50px 40px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center'}}>
+                    <div className="metric-label" style={{marginBottom: '16px'}}>Complexity Scale</div>
+                    <div style={{fontSize: '6rem', fontWeight: 900, color: 'var(--text-primary)', letterSpacing: '-0.08em', lineHeight: 0.8}}>
+                      {analysis?.complexity?.average_complexity || 0}
+                    </div>
+                    <div style={{fontSize: '13px', color: 'var(--text-tertiary)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.2em', marginTop: '24px'}}>
+                      {analysis?.complexity?.overall_label || 'READY'}
+                    </div>
+              </div>
+
+              {/* Narrative Explainer */}
+              <div className="col-7">
+                <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingLeft: '8px'}}>
+                  <Sparkles size={20} color="var(--accent-color)" />
+                  <span className="metric-label" style={{color: 'var(--text-primary)', fontSize: '13px'}}>Human Narrative Report</span>
+                </div>
+                <div className="white-panel" style={{padding: 'clamp(40px, 8vw, 80px)', minHeight: '600px', background: '#fff'}}>
+                  <ReadableExplanation text={explanation} />
+                </div>
+              </div>
+
+              {/* Sculptural Sidebar Insights */}
+              <div className="col-5" style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+                <div>
+                   <div style={{display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '24px', paddingLeft: '8px'}}>
+                      <Shield size={20} color="var(--text-primary)" />
+                      <span className="metric-label" style={{color: 'var(--text-primary)', fontSize: '13px'}}>Risk Factor Analysis</span>
+                   </div>
+                   <div style={{display: 'flex', flexDirection: 'column', gap: '24px'}}>
+                      {analysis?.smells?.map((smell, i) => (
+                        <motion.div 
+                          key={i} className="glass-card" 
+                          whileHover={{ scale: 1.02 }}
+                          style={{padding: '32px', background: 'white', boxShadow: 'var(--shadow-3d-md), var(--bevel-light)'}}
+                        >
+                           <div style={{display: 'flex', justifyContent: 'space-between', marginBottom: '16px'}}>
+                              <span style={{fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', color: smell.severity === 'high' ? 'var(--danger)' : 'var(--text-primary)'}}>
+                                {smell.kind.replace(/_/g, ' ')}
+                              </span>
+                              <Badge>LINE {smell.lineno}</Badge>
+                           </div>
+                           <p style={{fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.7}}>{smell.message}</p>
+                        </motion.div>
+                      ))}
+                   </div>
+                </div>
+
+                <div className="white-panel" style={{padding: '48px 40px', background: 'linear-gradient(135deg, #ffffff, #fdfdfd)', border: '1px solid var(--border-color)', boxShadow: 'var(--shadow-3d-lg)'}}>
+                   <h4 style={{fontSize: '20px', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px'}}>
+                      <Compass size={24} color="var(--accent-color)" /> Sculptural Context
+                   </h4>
+                   <p style={{fontSize: '16px', color: 'var(--text-secondary)', lineHeight: 1.8}}>
+                      Crafted via <strong>Engine Alpha</strong>, identifying cross-module patterns using high-precision AST sculpting. 
+                      Maintainability is weighted against geometric code density.
+                   </p>
+                </div>
+              </div>
+
+            </div>
           </motion.div>
         ) : (
           <motion.div 
-            initial={{opacity: 0, scale: 0.98}} animate={{opacity: 1, scale: 1}}
-            style={{height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '40px'}}
+            initial={{opacity: 0}} animate={{opacity: 1}}
+            style={{height: '100%', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', textAlign: 'center', padding: '60px'}}
           >
-             <div style={{position: 'relative', width: 'clamp(240px, 45vw, 560px)', height: 'clamp(240px, 35vw, 440px)', marginBottom: '40px'}}>
-                <img src="/illustration.png" alt="Logo" style={{width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 30px 60px rgba(0,0,0,0.06))'}} />
-             </div>
-             <h2 style={{fontSize: 'clamp(2.5rem, 6vw, 4rem)', fontWeight: 800, marginBottom: '24px', letterSpacing: '-0.05em', lineHeight: 1}}>Understand everything.</h2>
-             <p style={{color: 'var(--text-secondary)', maxWidth: '600px', margin: '0 auto', fontSize: 'clamp(1.1rem, 2vw, 1.4rem)', fontWeight: 400, lineHeight: 1.8}}>
-               Upload or choose a source file to see it transformed into a simple, human story you can actually understand.
+             <motion.div 
+               animate={{ y: [0, -20, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+               style={{position: 'relative', width: 'clamp(300px, 50vw, 600px)', height: 'clamp(260px, 40vw, 500px)', marginBottom: '60px'}}
+             >
+                <img src="/illustration.png" alt="Logo" style={{width: '100%', height: '100%', objectFit: 'contain', filter: 'drop-shadow(0 40px 80px rgba(0,0,0,0.08))'}} />
+             </motion.div>
+             <h2 style={{fontSize: 'clamp(3rem, 8vw, 5rem)', fontWeight: 800, marginBottom: '32px', letterSpacing: '-0.06em', lineHeight: 0.95}}>Understand <br/> Everything.</h2>
+             <p style={{color: 'var(--text-secondary)', maxWidth: '640px', margin: '0 auto', fontSize: 'clamp(1.2rem, 2.5vw, 1.6rem)', fontWeight: 500, lineHeight: 1.7}}>
+                Upload source files to generate 3D semantic mappings and narrative-driven code clarity.
              </p>
-             <button onClick={() => fileInputRef.current?.click()} className="btn-premium btn-primary" style={{marginTop: '48px', padding: '16px 40px', fontSize: '18px', borderRadius: '14px'}}>
-                Analyze New File
-             </button>
           </motion.div>
         )}
         </AnimatePresence>
       </div>
 
-      {/* Deep Trace Modal */}
-      <Modal isOpen={showTrace} onClose={() => setShowTrace(false)} title="Deep Trace Analysis">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '32px' }}>
-          <div style={{ background: '#f8fafc', padding: '24px', borderRadius: '14px', border: '1px solid var(--border-color)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <Search size={18} color="var(--accent-color)" />
-              <span className="metric-label" style={{ fontSize: '13px' }}>Raw AST Mapping</span>
+      <Modal isOpen={showTrace} onClose={() => setShowTrace(false)} title="Takra Engine Trace">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px' }}>
+          <div style={{ background: '#fafafa', padding: '32px', borderRadius: '24px', border: '1px solid var(--border-color)', boxShadow: 'var(--bevel-light)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '20px' }}>
+              <Search size={22} color="var(--accent-color)" />
+              <span className="metric-label" style={{ fontSize: '14px' }}>Deep AST Geometry</span>
             </div>
-            <pre style={{ fontSize: '12px', color: '#334155', overflowX: 'auto', padding: '16px', background: 'white', borderRadius: '10px', border: '1px solid var(--border-color)', lineHeight: 1.6, maxHeight: '300px' }}>
+            <pre style={{ fontSize: '13px', color: '#1a1a1a', overflowX: 'auto', padding: '24px', background: 'white', borderRadius: '16px', border: '1px solid var(--border-color)', lineHeight: 1.8, maxHeight: '400px' }}>
               {JSON.stringify(analysis, null, 2)}
             </pre>
-          </div>
-          
-          <div className="dashboard-grid">
-             <div className="col-6 white-panel" style={{ padding: '32px' }}>
-                <h4 style={{ fontSize: '15px', marginBottom: '16px' }}>Semantic Nodes</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                   {(analysis?.complexity?.functions || []).length > 0 ? analysis.complexity.functions.map((f, i) => (
-                     <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px' }}>
-                        <span style={{ fontFamily: 'var(--font-mono)', color: 'var(--text-secondary)' }}>{f.name}</span>
-                        <span style={{ fontWeight: 800 }}>{f.complexity} CPX</span>
-                     </div>
-                   )) : <p style={{ color: 'var(--text-tertiary)', fontSize: '13px' }}>No specific nodes found.</p>}
-                </div>
-             </div>
-             <div className="col-6 white-panel" style={{ padding: '32px' }}>
-                <h4 style={{ fontSize: '15px', marginBottom: '16px' }}>Logical Flow</h4>
-                <p style={{ fontSize: '14px', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                  Structural integrity verified via <strong>{analysis?.metrics?.total_lines || 0} lines</strong> of recursive analysis.
-                </p>
-             </div>
           </div>
         </div>
       </Modal>
 
       <style>{`
-          .premium-loader { width: 44px; height: 44px; border: 3px solid #f3f4f6; border-top-color: var(--text-primary); border-radius: 50%; animation: spin 0.6s linear infinite; }
-          @keyframes spin { to { transform: rotate(360deg); } }
-          
           .lg-toggle { display: none; }
           @media (max-width: 1023px) {
             .lg-toggle { display: flex !important; }
             .hero-img { display: none !important; }
-            .metric-sep { display: none !important; }
-            .main-content { padding-top: 80px !important; }
-          }
-          
-          .hidden.md\\:block { display: none; }
-          @media (min-width: 768px) {
-            .hidden.md\\:block { display: block; }
+            .main-content { padding-top: 100px !important; }
+            .sidebar { position: fixed; z-index: 50; transform: translateX(-100%); width: 100%; max-width: 320px; }
+            .sidebar.open { transform: translateX(0); }
           }
       `}</style>
     </div>
